@@ -1,98 +1,108 @@
-<p align="center">
-  <a href="http://nestjs.com/" target="blank"><img src="https://nestjs.com/img/logo-small.svg" width="120" alt="Nest Logo" /></a>
-</p>
+# 📚 Self-Learning Backend Project
 
-[circleci-image]: https://img.shields.io/circleci/build/github/nestjs/nest/master?token=abc123def456
-[circleci-url]: https://circleci.com/gh/nestjs/nest
+This is a self-learning project built to deepen my understanding of backend development using modern technologies such as **Node.js**, **NestJS**, **GraphQL**, and **PostgreSQL**. It covers real-world practices like API design, database interaction, caching, modular architecture, and more.
 
-  <p align="center">A progressive <a href="http://nodejs.org" target="_blank">Node.js</a> framework for building efficient and scalable server-side applications.</p>
-    <p align="center">
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/v/@nestjs/core.svg" alt="NPM Version" /></a>
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/l/@nestjs/core.svg" alt="Package License" /></a>
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/dm/@nestjs/common.svg" alt="NPM Downloads" /></a>
-<a href="https://circleci.com/gh/nestjs/nest" target="_blank"><img src="https://img.shields.io/circleci/build/github/nestjs/nest/master" alt="CircleCI" /></a>
-<a href="https://discord.gg/G7Qnnhy" target="_blank"><img src="https://img.shields.io/badge/discord-online-brightgreen.svg" alt="Discord"/></a>
-<a href="https://opencollective.com/nest#backer" target="_blank"><img src="https://opencollective.com/nest/backers/badge.svg" alt="Backers on Open Collective" /></a>
-<a href="https://opencollective.com/nest#sponsor" target="_blank"><img src="https://opencollective.com/nest/sponsors/badge.svg" alt="Sponsors on Open Collective" /></a>
-  <a href="https://paypal.me/kamilmysliwiec" target="_blank"><img src="https://img.shields.io/badge/Donate-PayPal-ff3f59.svg" alt="Donate us"/></a>
-    <a href="https://opencollective.com/nest#sponsor"  target="_blank"><img src="https://img.shields.io/badge/Support%20us-Open%20Collective-41B883.svg" alt="Support us"></a>
-  <a href="https://twitter.com/nestframework" target="_blank"><img src="https://img.shields.io/twitter/follow/nestframework.svg?style=social&label=Follow" alt="Follow us on Twitter"></a>
-</p>
-  <!--[![Backers on Open Collective](https://opencollective.com/nest/backers/badge.svg)](https://opencollective.com/nest#backer)
-  [![Sponsors on Open Collective](https://opencollective.com/nest/sponsors/badge.svg)](https://opencollective.com/nest#sponsor)-->
+## 🧰 Tech Stack
 
-## Description
+- Node.js – JavaScript runtime  
+- NestJS – Progressive Node.js framework  
+- GraphQL – Flexible API query language  
+- PostgreSQL – Relational database  
+- TypeORM – ORM for TypeScript and Node.js  
+- Redis – Caching layer (via `cache-manager`)  
+- Jest – Unit testing framework  
 
-[Nest](https://github.com/nestjs/nest) framework TypeScript starter repository.
+## ✨ Features
 
-## Project setup
+- Modular and scalable project structure  
+- GraphQL CRUD APIs  
+- PostgreSQL integration with TypeORM  
+- Redis caching layer  
+- Basic pagination and search  
+- Unit testing support  
+- Environment variable management  
 
-```bash
-$ npm install
-```
+## 🚀 Getting Started
 
-## Compile and run the project
+### Prerequisites
 
-```bash
-# development
-$ npm run start
+- Node.js v18+  
+- PostgreSQL  
+- Redis (optional if caching is enabled)  
 
-# watch mode
-$ npm run start:dev
-
-# production mode
-$ npm run start:prod
-```
-
-## Run tests
+### Installation
 
 ```bash
-# unit tests
-$ npm run test
+# Clone the repository
+git clone https://github.com/FakhrulZiq/library-management-system-be
+cd library-management-system-be
 
-# e2e tests
-$ npm run test:e2e
-
-# test coverage
-$ npm run test:cov
+# Install dependencies
+npm install
 ```
 
-## Deployment
+### Environment Variables
 
-When you're ready to deploy your NestJS application to production, there are some key steps you can take to ensure it runs as efficiently as possible. Check out the [deployment documentation](https://docs.nestjs.com/deployment) for more information.
+Create a `.env` file in the root directory and configure it:
 
-If you are looking for a cloud-based platform to deploy your NestJS application, check out [Mau](https://mau.nestjs.com), our official platform for deploying NestJS applications on AWS. Mau makes deployment straightforward and fast, requiring just a few simple steps:
+```env
+DATABASE_HOST=localhost
+DATABASE_PORT=5432
+DATABASE_USER=youruser
+DATABASE_PASSWORD=yourpassword
+DATABASE_NAME=yourdbname
+
+REDIS_HOST=localhost
+REDIS_PORT=6379
+REDIS_PASSWORD=yourpassword
+```
+
+### Run the Project
 
 ```bash
-$ npm install -g @nestjs/mau
-$ mau deploy
+# Start the development server
+npm run start:dev
+
+# Run the build
+npm run build
+
+# Start in production
+npm run start:prod
 ```
 
-With Mau, you can deploy your application in just a few clicks, allowing you to focus on building features rather than managing infrastructure.
+### Run Tests
 
-## Resources
+```bash
+npm run test
+```
 
-Check out a few resources that may come in handy when working with NestJS:
+## 📁 Project Structure
 
-- Visit the [NestJS Documentation](https://docs.nestjs.com) to learn more about the framework.
-- For questions and support, please visit our [Discord channel](https://discord.gg/G7Qnnhy).
-- To dive deeper and get more hands-on experience, check out our official video [courses](https://courses.nestjs.com/).
-- Deploy your application to AWS with the help of [NestJS Mau](https://mau.nestjs.com) in just a few clicks.
-- Visualize your application graph and interact with the NestJS application in real-time using [NestJS Devtools](https://devtools.nestjs.com).
-- Need help with your project (part-time to full-time)? Check out our official [enterprise support](https://enterprise.nestjs.com).
-- To stay in the loop and get updates, follow us on [X](https://x.com/nestframework) and [LinkedIn](https://linkedin.com/company/nestjs).
-- Looking for a job, or have a job to offer? Check out our official [Jobs board](https://jobs.nestjs.com).
+```
+src/
+├── modules/
+│   ├── book/
+│   │   ├── book.module.ts
+│   │   ├── book.service.ts
+│   │   └── book.resolver.ts
+├── common/
+│   ├── logger/
+│   ├── cache/
+│   └── constants/
+└── main.ts
+```
 
-## Support
+## 📌 Purpose
 
-Nest is an MIT-licensed open source project. It can grow thanks to the sponsors and support by the amazing backers. If you'd like to join them, please [read more here](https://docs.nestjs.com/support).
+This project is part of my personal journey to improve backend development skills and explore real-world backend concepts using TypeScript and NestJS.
 
-## Stay in touch
+---
 
-- Author - [Kamil Myśliwiec](https://twitter.com/kammysliwiec)
-- Website - [https://nestjs.com](https://nestjs.com/)
-- Twitter - [@nestframework](https://twitter.com/nestframework)
+Feel free to fork, clone, or suggest improvements!
 
-## License
+## 📬 Contact
 
-Nest is [MIT licensed](https://github.com/nestjs/nest/blob/master/LICENSE).
+Created with ❤️ by [Your Name]  
+[LinkedIn](https://www.linkedin.com/in/fakhrul-haziq/) • [GitHub](https://github.com/FakhrulZiq)
+
+
