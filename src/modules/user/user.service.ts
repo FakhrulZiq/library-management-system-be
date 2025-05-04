@@ -7,7 +7,7 @@ import {
 } from '@nestjs/common';
 import * as bcrypt from 'bcrypt';
 import { Audit } from 'src/domain/audit/audit';
-import { CRUD_ACTION, STATUS, TYPES } from 'src/infrastucture/constant';
+import { CRUD_ACTION, TYPES, USER_STATUS } from 'src/infrastucture/constant';
 import { IContextAwareLogger } from 'src/infrastucture/logger';
 import { IAudit } from 'src/interface/audit.interface';
 import { IUserRepository } from 'src/interface/repositories/user.repositories.interface';
@@ -46,7 +46,7 @@ export class UserService implements IUserService {
       });
 
       if (!user) {
-        throw new Error(`User with ID ${id} not found`);
+        throw new NotFoundException(`User with ID ${id} not found`);
       }
 
       const userById: IUserByID = UserParser.userById(user);
@@ -102,7 +102,7 @@ export class UserService implements IUserService {
         password: hashedPassword,
         role,
         name,
-        status: STATUS.ACTIVE,
+        status: USER_STATUS.ACTIVE,
         matricOrStaffNo,
         audit,
       }).getValue();

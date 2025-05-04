@@ -13,6 +13,7 @@ import {
   TYPES,
 } from 'src/infrastucture/constant';
 import { IContextAwareLogger } from 'src/infrastucture/logger';
+import { IRedisService } from 'src/infrastucture/redis/redisInterface';
 import { IAudit } from 'src/interface/audit.interface';
 import {
   IBookRepository,
@@ -30,10 +31,9 @@ import {
   IListBookInpput,
   IUpdateBook,
 } from 'src/interface/service/book.service.interface';
+import { pagination } from 'src/utilities/utils';
 import { Book } from './book';
 import { BookParser } from './book.parser';
-import { IRedisService } from 'src/infrastucture/redis/redisInterface';
-import { pagination } from 'src/utilities/utils';
 
 @Injectable()
 export class BookService implements IBookService {
@@ -42,7 +42,7 @@ export class BookService implements IBookService {
     private readonly _logger: IContextAwareLogger,
     @Inject(TYPES.IBookRepository)
     private readonly _bookRepository: IBookRepository,
-    @Inject(TYPES.RedisCacheService)
+    @Inject(TYPES.IRedisService)
     protected readonly _redisCacheService: IRedisService,
   ) {}
 
@@ -53,10 +53,9 @@ export class BookService implements IBookService {
       const defaultPageSize = PAGINATION.defaultRecords;
       input.pageSize = pageSize ?? defaultPageSize;
 
-      const cacheKey = `membership_list_page${pageNum}_limit${pageSize}`;
+      const cacheKey = `list_book_page${pageNum}_limit${pageSize}`;
 
-      const cachedData: IFindBookResponse | null =
-        await this._getCachedData(cacheKey);
+      const cachedData = await this._getCachedData(cacheKey);
 
       if (cachedData) {
         return cachedData;
@@ -67,14 +66,18 @@ export class BookService implements IBookService {
 
       const parsedBook = BookParser.findBook(books.data);
 
-      const paginatedBook = pagination(parsedBook, input, books.total);
+      const paginatedBook: IFindBookResponse = pagination(
+        parsedBook,
+        input,
+        books.total,
+      ) as unknown as IFindBookResponse;
 
       await this._cacheResponse(paginatedBook, cacheKey);
 
       return paginatedBook;
     } catch (error) {
       this._logger.error(error.message, error);
-      throw new Error(error);
+      throw error;
     }
   }
 
@@ -106,6 +109,7 @@ export class BookService implements IBookService {
       try {
         const result: IAddOneBookResponse = await this.addOneBook(input, email);
         success.push(result);
+        await this.deleteBookPageCache();
       } catch (err) {
         failed.push(input.title);
       }
@@ -145,7 +149,7 @@ export class BookService implements IBookService {
       return { message: 'Book added successfully' };
     } catch (error) {
       this._logger.error(error.message, error);
-      throw new Error(error);
+      throw error;
     }
   }
 
@@ -181,10 +185,12 @@ export class BookService implements IBookService {
         throw new InternalServerErrorException(`Failed to update book`);
       }
 
+      await this.deleteBookPageCache();
+
       return BookParser.updatedBook(updatedBook);
     } catch (error) {
       this._logger.error(error.message, error);
-      throw new Error(error);
+      throw error;
     }
   }
 
@@ -210,10 +216,12 @@ export class BookService implements IBookService {
         throw new InternalServerErrorException(`Failed to delete book`);
       }
 
+      await this.deleteBookPageCache();
+
       return { message: 'Book deleted successfully!' };
     } catch (error) {
       this._logger.error(error.message, error);
-      throw new Error(error);
+      throw error;
     }
   }
 
@@ -227,5 +235,12 @@ export class BookService implements IBookService {
       data,
       DEFAULT_CACHE_TIME_TO_LIVE,
     );
+  }
+
+  async deleteBookPageCache(): Promise<void> {
+    for (let page = 1; page <= 5; page++) {
+      const cacheKey = `list_book_page${page}_limit${PAGINATION.defaultRecords}`;
+      await this._redisCacheService.delete(cacheKey);
+    }
   }
 }

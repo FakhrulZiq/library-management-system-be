@@ -1,9 +1,15 @@
+import { NotFoundException } from '@nestjs/common';
 import { Audit } from 'src/domain/audit/audit';
-import { PAGINATION } from 'src/infrastucture/constant';
+import {
+  DEFAULT_CACHE_TIME_TO_LIVE,
+  PAGINATION,
+} from 'src/infrastucture/constant';
+import { IRedisService } from 'src/infrastucture/redis/redisInterface';
 import {
   IFindBookResponse,
   IListBookInpput,
 } from 'src/interface/service/Book.service.interface';
+import { IBorrowedBookListResponse } from 'src/interface/service/borrowedBook.service.interface';
 
 /**
  * Updates an object with new properties and adds an audit trail.
@@ -29,15 +35,24 @@ export const updateEntity = (
 };
 
 export const extractDateFromISOString = (ISODate: string): string => {
+  if (!ISODate) return '-';
   const [datePart] = ISODate.split('T');
   return datePart;
 };
 
+/**
+ * Paginates the given data based on the provided filter object and total records.
+ *
+ * @param {any[]} data
+ * @param {(IListBookInpput)} inputObj
+ * @param {number} total
+ * @return {*}  {(IFindBookResponse | IBorrowedBookListResponse)}
+ */
 export const pagination = (
   data: any[],
   inputObj: IListBookInpput,
   total: number,
-): IFindBookResponse => {
+): IFindBookResponse | IBorrowedBookListResponse => {
   const pageRecords = inputObj?.pageSize || PAGINATION?.defaultRecords;
   const page = inputObj?.pageNum;
   const totalPages = Math.ceil(total / pageRecords);

@@ -8,12 +8,17 @@ export class BorrowedBookModel extends BaseModel {
   @Column()
   borrow_date: string;
 
+  @Column()
   user_id: string;
 
+  @Column()
   book_id: string;
 
+  @Column({ nullable: true })
+  return_date?: string;
+
   @Column()
-  return_date: string;
+  due_date: string;
 
   @Column()
   status: string;

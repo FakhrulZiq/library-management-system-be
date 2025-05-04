@@ -22,7 +22,7 @@ import { RedisCacheService } from 'src/infrastucture/redis/redisService';
       useClass: BookRepository,
     },
     { provide: TYPES.IApplicationLogger, useClass: ApplicationLogger },
-    { provide: TYPES.RedisCacheService, useClass: RedisCacheService },
+    { provide: TYPES.IRedisService, useClass: RedisCacheService },
     BookMapper,
   ],
 })
