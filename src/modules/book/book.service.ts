@@ -1,0 +1,231 @@
+import {
+  BadRequestException,
+  Inject,
+  Injectable,
+  InternalServerErrorException,
+  NotFoundException,
+} from '@nestjs/common';
+import { Audit } from 'src/domain/audit/audit';
+import {
+  CRUD_ACTION,
+  DEFAULT_CACHE_TIME_TO_LIVE,
+  PAGINATION,
+  TYPES,
+} from 'src/infrastucture/constant';
+import { IContextAwareLogger } from 'src/infrastucture/logger';
+import { IAudit } from 'src/interface/audit.interface';
+import {
+  IBookRepository,
+  IListBooByPaginationResponse,
+} from 'src/interface/repositories/book.repositories.interface';
+import {
+  IAddBookResponse,
+  IAddNewBookInput,
+  IAddOneBookResponse,
+  IBookService,
+  IDeleteBookResponse,
+  IFindBookData,
+  IFindBookInput,
+  IFindBookResponse,
+  IListBookInpput,
+  IUpdateBook,
+} from 'src/interface/service/book.service.interface';
+import { Book } from './book';
+import { BookParser } from './book.parser';
+import { IRedisService } from 'src/infrastucture/redis/redisInterface';
+import { pagination } from 'src/utilities/utils';
+
+@Injectable()
+export class BookService implements IBookService {
+  constructor(
+    @Inject(TYPES.IApplicationLogger)
+    private readonly _logger: IContextAwareLogger,
+    @Inject(TYPES.IBookRepository)
+    private readonly _bookRepository: IBookRepository,
+    @Inject(TYPES.RedisCacheService)
+    protected readonly _redisCacheService: IRedisService,
+  ) {}
+
+  async listBook(input: IListBookInpput): Promise<IFindBookResponse> {
+    try {
+      const { pageNum, pageSize } = input;
+
+      const defaultPageSize = PAGINATION.defaultRecords;
+      input.pageSize = pageSize ?? defaultPageSize;
+
+      const cacheKey = `membership_list_page${pageNum}_limit${pageSize}`;
+
+      const cachedData: IFindBookResponse | null =
+        await this._getCachedData(cacheKey);
+
+      if (cachedData) {
+        return cachedData;
+      }
+
+      const books: IListBooByPaginationResponse =
+        await this._bookRepository.listBookByPagination(input);
+
+      const parsedBook = BookParser.findBook(books.data);
+
+      const paginatedBook = pagination(parsedBook, input, books.total);
+
+      await this._cacheResponse(paginatedBook, cacheKey);
+
+      return paginatedBook;
+    } catch (error) {
+      this._logger.error(error.message, error);
+      throw new Error(error);
+    }
+  }
+
+  async findBook(input: IFindBookInput): Promise<IFindBookData[]> {
+    try {
+      const books: Book[] = await this._bookRepository.findBookByInput(input);
+
+      if (books?.length === 0) {
+        throw new NotFoundException(`Book not found`);
+      }
+
+      const foundBook: IFindBookData[] = BookParser.findBook(books);
+
+      return foundBook;
+    } catch (error) {
+      this._logger.error(error.message, error);
+      throw error;
+    }
+  }
+
+  async addManyBooks(
+    inputs: IAddNewBookInput[],
+    email: string,
+  ): Promise<IAddBookResponse> {
+    const success: IAddOneBookResponse[] = [];
+    const failed: string[] = [];
+
+    for (const input of inputs) {
+      try {
+        const result: IAddOneBookResponse = await this.addOneBook(input, email);
+        success.push(result);
+      } catch (err) {
+        failed.push(input.title);
+      }
+    }
+
+    return { success, failed };
+  }
+
+  async addOneBook(
+    input: IAddNewBookInput,
+    email: string,
+  ): Promise<IAddOneBookResponse> {
+    try {
+      const { title, author, barcodeNo, published_year, quantity } = input;
+
+      const auditProps: IAudit = Audit.createAuditProperties(
+        email,
+        CRUD_ACTION.create,
+      );
+      const audit: Audit = Audit.create(auditProps).getValue();
+
+      const newBook = Book.create({
+        title,
+        author,
+        barcodeNo,
+        published_year,
+        quantity,
+        audit,
+      }).getValue();
+
+      const savedBook = await this._bookRepository.save(newBook);
+
+      if (!savedBook) {
+        throw new BadRequestException(`Unable to add this ${title} book`);
+      }
+
+      return { message: 'Book added successfully' };
+    } catch (error) {
+      this._logger.error(error.message, error);
+      throw new Error(error);
+    }
+  }
+
+  async updateBook(input: IUpdateBook, email: string): Promise<IFindBookData> {
+    try {
+      const { id, title, author, barcodeNo, published_year, quantity } = input;
+
+      const updateData = {
+        title,
+        author,
+        barcodeNo,
+        published_year,
+        quantity,
+      };
+
+      const book: Book = await this._bookRepository.findOne({ where: { id } });
+
+      if (!book) {
+        throw new NotFoundException(`There is no book with ID ${input.id}`);
+      }
+
+      const auditProps: IAudit = Audit.createAuditProperties(
+        email,
+        CRUD_ACTION.update,
+      );
+      const audit: Audit = Audit.create(auditProps).getValue();
+
+      const bookUpdate = Book.update(updateData, book, audit);
+
+      const updatedBook: Book = await this._bookRepository.save(bookUpdate);
+
+      if (!updatedBook) {
+        throw new InternalServerErrorException(`Failed to update book`);
+      }
+
+      return BookParser.updatedBook(updatedBook);
+    } catch (error) {
+      this._logger.error(error.message, error);
+      throw new Error(error);
+    }
+  }
+
+  async deleteBook(id: string, email: string): Promise<IDeleteBookResponse> {
+    try {
+      const book = await this._bookRepository.findOne({ where: { id } });
+
+      if (!book) {
+        throw new NotFoundException(`There is no book with ID ${id}`);
+      }
+
+      const auditProps: IAudit = Audit.createAuditProperties(
+        email,
+        CRUD_ACTION.delete,
+      );
+      const audit: Audit = Audit.create(auditProps).getValue();
+
+      const bookUpdate = Book.update(book, book, audit);
+
+      const updatedBook: Book = await this._bookRepository.save(bookUpdate);
+
+      if (!updatedBook) {
+        throw new InternalServerErrorException(`Failed to delete book`);
+      }
+
+      return { message: 'Book deleted successfully!' };
+    } catch (error) {
+      this._logger.error(error.message, error);
+      throw new Error(error);
+    }
+  }
+
+  private async _getCachedData(cacheKey: string): Promise<any> {
+    return (await this._redisCacheService.get(cacheKey)) as any;
+  }
+
+  private async _cacheResponse(data: any, cacheKey: string): Promise<void> {
+    await this._redisCacheService.set(
+      cacheKey,
+      data,
+      DEFAULT_CACHE_TIME_TO_LIVE,
+    );
+  }
+}

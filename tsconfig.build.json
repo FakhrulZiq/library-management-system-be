@@ -1,0 +1,12 @@
+{
+  "extends": "./tsconfig.json",
+  "compilerOptions": {
+    "outDir": "./dist",
+    "rootDir": "./",
+    "moduleResolution": "node",
+    "resolveJsonModule": true,
+    "allowJs": true
+  },
+  "include": ["src/**/*", "migrations/**/*", "config/**/*"],
+  "exclude": ["node_modules", "test", "dist", "**/*spec.ts"]
+}
