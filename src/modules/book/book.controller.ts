@@ -19,11 +19,10 @@ import {
   AddNewBookInput,
   FindBookData,
   FindBookInput,
-  FindBookResponse,
   ListBookInput,
   UpdateBookInput,
 } from './dto/bookInput.dto';
-import { AddBookResponse, DeleteBookResponse } from './dto/bookOutput.dto';
+import { AddBookResponse, DeleteBookResponse, FindBookResponse } from './dto/bookOutput.dto';
 
 @ApiTags('book')
 @ApiBearerAuth()

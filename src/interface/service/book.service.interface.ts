@@ -7,6 +7,7 @@ export interface IBookService {
   updateBook(input: IUpdateBook, email: string): Promise<IFindBookData>;
   listBook(input: IListBookInpput): Promise<IFindBookResponse>;
   deleteBook(id: string, email: string): Promise<IDeleteBookResponse>;
+  deleteBookPageCache(): Promise<void>;
 }
 
 export interface IUpdateBook {
@@ -45,7 +46,7 @@ export interface IFindBookInput {
 }
 
 export interface IFindBookResponse {
-  data: IFindBookData[]
+  data: IFindBookData[];
   startRecord: number;
   endRecord: number;
   total?: number;
