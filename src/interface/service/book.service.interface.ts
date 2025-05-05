@@ -8,6 +8,7 @@ export interface IBookService {
   listBook(input: IListBookInpput): Promise<IFindBookResponse>;
   deleteBook(id: string, email: string): Promise<IDeleteBookResponse>;
   deleteBookPageCache(): Promise<void>;
+  getBookById(id: string): Promise<IFindBookData>;
 }
 
 export interface IUpdateBook {

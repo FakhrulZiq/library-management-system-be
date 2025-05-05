@@ -12,6 +12,12 @@ export class AuthResponse {
 
   @ApiProperty()
   role: string;
+
+  @ApiProperty()
+  name: string;
+
+  @ApiProperty()
+  id: string;
 }
 
 export class NewAccessTokenDto {
