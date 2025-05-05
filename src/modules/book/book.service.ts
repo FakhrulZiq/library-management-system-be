@@ -48,16 +48,16 @@ export class BookService implements IBookService {
 
   async listBook(input: IListBookInpput): Promise<IFindBookResponse> {
     try {
-      const { pageNum, pageSize } = input;
+      const { pageNum, pageSize, search } = input;
 
       const defaultPageSize = PAGINATION.defaultRecords;
       input.pageSize = pageSize ?? defaultPageSize;
 
-      const cacheKey = `list_book_page${pageNum}_limit${pageSize}`;
+      const cacheKey = `list_book_page${pageNum}_limit${pageSize}_searchBy${search}`;
 
       const cachedData = await this._getCachedData(cacheKey);
 
-      if (cachedData) {
+      if (cachedData && !input.search) {
         return cachedData;
       }
 
@@ -90,6 +90,25 @@ export class BookService implements IBookService {
       }
 
       const foundBook: IFindBookData[] = BookParser.findBook(books);
+
+      return foundBook;
+    } catch (error) {
+      this._logger.error(error.message, error);
+      throw error;
+    }
+  }
+
+  async getBookById(id: string): Promise<IFindBookData> {
+    try {
+      const book: Book = await this._bookRepository.findOne({
+        where: { id },
+      });
+
+      if (!book) {
+        throw new NotFoundException(`Book not found`);
+      }
+
+      const foundBook: IFindBookData = BookParser.updatedBook(book);
 
       return foundBook;
     } catch (error) {

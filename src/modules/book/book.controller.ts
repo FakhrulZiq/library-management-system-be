@@ -33,7 +33,7 @@ export class BookController {
     private readonly _bookService: IBookService,
   ) {}
 
-  @Get('listBook')
+  @Post('listBook')
   @UseGuards(JwtAuthGuard)
   @ApiOperation({ summary: 'List all books' })
   async listBooks(@Body() input: ListBookInput): Promise<FindBookResponse> {
@@ -58,6 +58,13 @@ export class BookController {
   @ApiOperation({ summary: 'Find multiple books' })
   async findBook(@Body() input: FindBookInput): Promise<FindBookData[]> {
     return this._bookService.findBook(input);
+  }
+
+  @Get(':id')
+  @UseGuards(JwtAuthGuard)
+  @ApiOperation({ summary: 'Get book by ID' })
+  getBookById(@Param('id') id: string): Promise<FindBookData> {
+    return this._bookService.getBookById(id);
   }
 
   @Post('updateBook')

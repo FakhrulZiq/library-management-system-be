@@ -2,6 +2,7 @@ export interface IAuthService {
   validateUser(input: IValidateUserInput): Promise<IValidateUserResponse>;
   assignNewAcessToken(input: INewAccessTokenInput): Promise<INewAccessToken>;
   logout(input: INewAccessTokenInput): Promise<ILogOutResponse>;
+  verifyToken(accessToken: string): Promise<boolean>;
 }
 
 export interface IValidateUserInput {
@@ -14,6 +15,8 @@ export interface IValidateUserResponse {
   refreshToken: string;
   email: string;
   role: string;
+  name: string;
+  id: string
 }
 
 export interface INewAccessTokenInput {

@@ -72,7 +72,26 @@ export class AuthService implements IAuthService {
         refreshToken,
         email: user.email,
         role: user.role,
+        name: user.name,
+        id: user.id,
       };
+    } catch (error) {
+      this._logger.error(error.message, error);
+      throw error;
+    }
+  }
+
+  async verifyToken(accessToken: string): Promise<boolean> {
+    try {
+      const payload: IPayloadJwt = this._jwtService.verify(accessToken, {
+        secret: this._configService.get<string>('JWT_SECRET'),
+      });
+      if (payload.exp && Date.now() >= payload.exp * 1000) {
+        this._logger.warn('', 'Token expired');
+        return false;
+      }
+
+      return true;
     } catch (error) {
       this._logger.error(error.message, error);
       throw error;
