@@ -10,6 +10,7 @@ import {
   IListBookInpput,
 } from 'src/interface/service/Book.service.interface';
 import { IBorrowedBookListResponse } from 'src/interface/service/borrowedBook.service.interface';
+import { IFindUserResponse } from 'src/interface/service/user.service.interface';
 
 /**
  * Updates an object with new properties and adds an audit trail.
@@ -52,7 +53,7 @@ export const pagination = (
   data: any[],
   inputObj: IListBookInpput,
   total: number,
-): IFindBookResponse | IBorrowedBookListResponse => {
+): IFindBookResponse | IBorrowedBookListResponse | IFindUserResponse => {
   const pageRecords = inputObj?.pageSize || PAGINATION?.defaultRecords;
   const page = inputObj?.pageNum;
   const totalPages = Math.ceil(total / pageRecords);

@@ -221,15 +221,35 @@ export class BookService implements IBookService {
         throw new NotFoundException(`There is no book with ID ${id}`);
       }
 
-      const auditProps: IAudit = Audit.createAuditProperties(
+      let updatedBook: Book;
+      const updateAuditProps: IAudit = Audit.createAuditProperties(
+        email,
+        CRUD_ACTION.update,
+      );
+      const updateAudit: Audit = Audit.create(updateAuditProps).getValue();
+
+      const deleteAuditProps: IAudit = Audit.createAuditProperties(
         email,
         CRUD_ACTION.delete,
       );
-      const audit: Audit = Audit.create(auditProps).getValue();
+      const deleteAudit: Audit = Audit.create(deleteAuditProps).getValue();
 
-      const bookUpdate = Book.update(book, book, audit);
-
-      const updatedBook: Book = await this._bookRepository.save(bookUpdate);
+      if (book.quantity > 1) {
+        const updatedQuantity = book.quantity - 1;
+        const bookUpdate = Book.update(
+          { ...book, quantity: updatedQuantity },
+          book,
+          updateAudit,
+        );
+        updatedBook = await this._bookRepository.save(bookUpdate);
+      } else {
+        const bookUpdate = Book.update(
+          { ...book, quantity: 0 },
+          book,
+          deleteAudit,
+        );
+        updatedBook = await this._bookRepository.save(bookUpdate);
+      }
 
       if (!updatedBook) {
         throw new InternalServerErrorException(`Failed to delete book`);
@@ -257,9 +277,9 @@ export class BookService implements IBookService {
   }
 
   async deleteBookPageCache(): Promise<void> {
-    for (let page = 1; page <= 5; page++) {
-      const cacheKey = `list_book_page${page}_limit${PAGINATION.defaultRecords}`;
-      await this._redisCacheService.delete(cacheKey);
+    const keys = await this._redisCacheService.keys('*list_book_page*');
+    if (keys.length > 0) {
+      await this._redisCacheService.deleteMany(keys);
     }
   }
 }

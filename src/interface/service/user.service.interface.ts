@@ -5,7 +5,7 @@ export interface IUserService {
   register(input: IResgisterInput): Promise<IRegisterResponse>;
   findByEmail(email: string): Promise<User>;
   clearRefreshToken(id: string): Promise<void>;
-  getUser(): Promise<IUserByID[]>;
+  getUser(input: IListUserInput): Promise<IFindUserResponse>;
 }
 
 export interface IResgisterInput {
@@ -21,8 +21,27 @@ export interface IRegisterResponse {
 }
 
 export interface IUserByID {
+  id: string;
   email: string;
   role: string;
   name: string;
+  status: string;
   matricOrStaffNo: string;
+}
+
+export interface IListUserInput {
+  search?: string;
+  pageNum?: number;
+  pageSize?: number;
+  roles?: string[];
+}
+
+export interface IFindUserResponse {
+  data: IUserByID[];
+  startRecord: number;
+  endRecord: number;
+  total?: number;
+  pageSize?: number;
+  totalPages?: number;
+  nextPage?: number;
 }

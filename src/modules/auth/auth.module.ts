@@ -12,6 +12,8 @@ import { TYPES } from 'src/infrastucture/constant';
 import { UserRepository } from 'src/infrastucture/dataAccess/repositories/user.repository';
 import { ApplicationLogger } from 'src/infrastucture/logger';
 import { AuthController } from './auth.controller';
+import { RedisCacheService } from 'src/infrastucture/redis/redisService';
+import { RedisClientProvider } from 'src/infrastucture/redis/redis.provider';
 
 @Module({
   imports: [
@@ -41,6 +43,8 @@ import { AuthController } from './auth.controller';
       useClass: UserRepository,
     },
     { provide: TYPES.IApplicationLogger, useClass: ApplicationLogger },
+    { provide: TYPES.IRedisService, useClass: RedisCacheService },
+    RedisClientProvider,
     UserMapper,
     JwtStrategy,
   ],

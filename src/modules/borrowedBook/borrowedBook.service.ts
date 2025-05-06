@@ -96,7 +96,7 @@ export class BorrowedBookService implements IBorrowedBookService {
       const activeBorrows =
         await this._borrowedBookRepository.getActiveBorrows(studentId);
 
-      await this._deleteCache();
+      await this._deleteBorrowCache();
       await this._bookServie.deleteBookPageCache();
 
       return {
@@ -197,7 +197,7 @@ export class BorrowedBookService implements IBorrowedBookService {
         );
       }
 
-      await this._deleteCache();
+      await this._deleteBorrowCache();
       await this._bookServie.deleteBookPageCache();
 
       return {
@@ -316,10 +316,10 @@ export class BorrowedBookService implements IBorrowedBookService {
     );
   }
 
-  private async _deleteCache(): Promise<void> {
-    for (let page = 1; page <= 5; page++) {
-      const cacheKey = `borrowed_book_page${page}_limit${PAGINATION.defaultRecords}`;
-      await this._redisCacheService.delete(cacheKey);
+  private async _deleteBorrowCache(): Promise<void> {
+    const keys = await this._redisCacheService.keys('*borrowed_book_page*');
+    if (keys.length > 0) {
+      await this._redisCacheService.deleteMany(keys);
     }
   }
 }

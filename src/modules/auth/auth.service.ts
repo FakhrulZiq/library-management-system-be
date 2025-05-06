@@ -120,7 +120,11 @@ export class AuthService implements IAuthService {
         );
       }
 
-      const newAccessToken = this._jwtService.sign({ sub: user.id });
+      const inputNewToken = { email: user.email, sub: user.id, role: user.role };
+      const newAccessToken = this._jwtService.sign(inputNewToken, {
+        expiresIn: '2m',
+      });
+
       return { accessToken: newAccessToken };
     } catch (error) {
       this._logger.error(error.message, error);

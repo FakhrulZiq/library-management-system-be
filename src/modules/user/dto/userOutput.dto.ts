@@ -7,6 +7,9 @@ export class RegisterResponse {
 
 export class UserByIdResponse {
   @ApiProperty()
+  id: string;
+
+  @ApiProperty()
   email: string;
 
   @ApiProperty()
@@ -16,5 +19,31 @@ export class UserByIdResponse {
   name: string;
 
   @ApiProperty()
+  status: string;
+
+  @ApiProperty()
   matricOrStaffNo: string;
+}
+
+export class FindUserResponse {
+  @ApiProperty()
+  data: UserByIdResponse[];
+
+  @ApiProperty()
+  startRecord: number;
+
+  @ApiProperty()
+  endRecord: number;
+
+  @ApiProperty()
+  total?: number;
+
+  @ApiProperty()
+  pageSize?: number;
+
+  @ApiProperty()
+  totalPages?: number;
+
+  @ApiProperty()
+  nextPage?: number;
 }

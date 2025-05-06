@@ -24,3 +24,17 @@ export class RegisterInput {
   @ApiProperty()
   matricOrStaffNo: string;
 }
+
+export class ListUserInput {
+  @ApiProperty()
+  search?: string;
+
+  @ApiProperty()
+  pageNum?: number;
+
+  @ApiProperty()
+  pageSize?: number;
+
+  @ApiProperty()
+  roles?: string[];
+}
