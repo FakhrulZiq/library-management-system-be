@@ -6,6 +6,7 @@ import { CacheModule } from "@nestjs/cache-manager";
 import { RedisCacheService } from "./redisService";
 import { TYPES } from "../constant";
 import { ApplicationLogger } from "../logger";
+import { RedisClientProvider } from "./redis.provider";
 
 @Module({
   imports: [
@@ -33,6 +34,7 @@ import { ApplicationLogger } from "../logger";
   ],
   providers: [
     RedisCacheService,
+    RedisClientProvider,
     { provide: TYPES.IApplicationLogger, useClass: ApplicationLogger },
   ],
   exports: [CacheModule, RedisCacheService],

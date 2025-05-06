@@ -15,7 +15,7 @@ import { JwtAuthGuard } from '../auth/auth.guard';
 import {
   BorrowBookInput,
   BorrowedBookListInput,
-  ReturnBookInput,
+  ReturnBookInput
 } from './dto/borrowBookInput.dto';
 import {
   BorrowBookOutput,
@@ -62,12 +62,21 @@ export class BorrowedBookController {
     return this._borrowedBookService.returnBook(input, email);
   }
 
-  @Get('transactions')
+  @Post('transactions')
   @UseGuards(JwtAuthGuard)
   @ApiOperation({ summary: 'List all borrowed books' })
   async listBooks(
     @Body() input: BorrowedBookListInput,
   ): Promise<BorrowedListResponse> {
     return this._borrowedBookService.getAllBorrowedBook(input);
+  }
+
+  @Post('student')
+  @UseGuards(JwtAuthGuard)
+  @ApiOperation({ summary: 'List all borrowed books by student' })
+  async borrowByStudent(
+    @Body() input: BorrowedBookListInput,
+  ): Promise<BorrowedListResponse> {
+    return this._borrowedBookService.getBorrowBookByStudentId(input);
   }
 }

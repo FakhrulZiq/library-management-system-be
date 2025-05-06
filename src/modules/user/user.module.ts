@@ -7,6 +7,8 @@ import { ApplicationLogger } from 'src/infrastucture/logger';
 import { UserController } from './user.controller';
 import { UserMapper } from './user.mapper';
 import { UserService } from './user.service';
+import { RedisCacheService } from 'src/infrastucture/redis/redisService';
+import { RedisClientProvider } from 'src/infrastucture/redis/redis.provider';
 
 @Module({
   imports: [TypeOrmModule.forFeature([UserModel])],
@@ -21,6 +23,8 @@ import { UserService } from './user.service';
       useClass: UserRepository,
     },
     { provide: TYPES.IApplicationLogger, useClass: ApplicationLogger },
+    { provide: TYPES.IRedisService, useClass: RedisCacheService },
+    RedisClientProvider,
     UserMapper,
   ],
 })

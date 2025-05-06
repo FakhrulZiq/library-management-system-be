@@ -63,6 +63,12 @@ export class BorrowedBookData {
   returnDate: string | null;
 
   @ApiProperty()
+  dueDate: string | null;
+
+  @ApiProperty()
+  remainingDay: number;
+
+  @ApiProperty()
   status: string;
 
   @ApiProperty()

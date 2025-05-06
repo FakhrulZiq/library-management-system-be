@@ -12,8 +12,12 @@ import {
   IUserByID,
   IUserService,
 } from 'src/interface/service/user.service.interface';
-import { RegisterResponse, UserByIdResponse } from './dto/userOutput.dto';
-import { RegisterInput } from './dto/userInput.dto';
+import {
+  FindUserResponse,
+  RegisterResponse,
+  UserByIdResponse,
+} from './dto/userOutput.dto';
+import { ListUserInput, RegisterInput } from './dto/userInput.dto';
 import { JwtAuthGuard } from '../auth/auth.guard';
 import {
   ApiBearerAuth,
@@ -33,12 +37,12 @@ export class UserController {
     private readonly _userService: IUserService,
   ) {}
 
-  @Get('listUser')
+  @Post('listUser')
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles('admin')
   @ApiOperation({ summary: 'List all user' })
-  listuser(): Promise<UserByIdResponse[]> {
-    return this._userService.getUser();
+  async listuser(@Body() input: ListUserInput): Promise<FindUserResponse> {
+    return this._userService.getUser(input);
   }
 
   @Get(':id')
@@ -53,8 +57,8 @@ export class UserController {
     return this._userService.findById(id);
   }
 
-  @Post()
-  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Post('register')
+  @UseGuards()
   @Roles('admin')
   @ApiOperation({ summary: 'Register a new user' })
   @ApiResponse({

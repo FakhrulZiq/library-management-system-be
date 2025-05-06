@@ -7,11 +7,19 @@ import {
 } from '@nestjs/common';
 import * as bcrypt from 'bcrypt';
 import { Audit } from 'src/domain/audit/audit';
-import { CRUD_ACTION, TYPES, USER_STATUS } from 'src/infrastucture/constant';
+import {
+  CRUD_ACTION,
+  DEFAULT_CACHE_TIME_TO_LIVE,
+  PAGINATION,
+  TYPES,
+  USER_STATUS,
+} from 'src/infrastucture/constant';
 import { IContextAwareLogger } from 'src/infrastucture/logger';
 import { IAudit } from 'src/interface/audit.interface';
 import { IUserRepository } from 'src/interface/repositories/user.repositories.interface';
 import {
+  IFindUserResponse,
+  IListUserInput,
   IRegisterResponse,
   IResgisterInput,
   IUserByID,
@@ -19,6 +27,8 @@ import {
 } from 'src/interface/service/user.service.interface';
 import { User } from './user';
 import { UserParser } from './user.parser';
+import { IRedisService } from 'src/infrastucture/redis/redisInterface';
+import { pagination } from 'src/utilities/utils';
 
 @Injectable()
 export class UserService implements IUserService {
@@ -27,12 +37,37 @@ export class UserService implements IUserService {
     private readonly _logger: IContextAwareLogger,
     @Inject(TYPES.IUserRepository)
     private readonly _userRepository: IUserRepository,
+    @Inject(TYPES.IRedisService)
+    protected readonly _redisCacheService: IRedisService,
   ) {}
 
-  async getUser(): Promise<IUserByID[]> {
+  async getUser(input: IListUserInput): Promise<IFindUserResponse> {
     try {
-      const user = await this._userRepository.findAll();
-      return UserParser.listUser(user);
+      const { pageNum, pageSize, search, roles } = input;
+
+      const defaultPageSize = PAGINATION.defaultRecords;
+      input.pageSize = pageSize ?? defaultPageSize;
+
+      const cacheKey = `list_user_page${pageNum}_limit${pageSize}_searchBy${search}_role${roles}`;
+
+      const cachedData = await this._getCachedData(cacheKey);
+
+      if (cachedData && !input.search) {
+        return cachedData;
+      }
+      const users = await this._userRepository.listBookByPagination(input);
+
+      const parsedUser = UserParser.listUser(users.data);
+
+      const paginatedBook: IFindUserResponse = pagination(
+        parsedUser,
+        input,
+        users.total,
+      ) as unknown as IFindUserResponse;
+
+      await this._cacheResponse(paginatedBook, cacheKey);
+
+      return paginatedBook;
     } catch (error) {
       this._logger.error(error.message, error);
       throw error;
@@ -115,6 +150,8 @@ export class UserService implements IUserService {
         );
       }
 
+      await this._deleteUserPageCache();
+
       return { message: 'User registration successfully' };
     } catch (error) {
       this._logger.error(error.message, error);
@@ -136,6 +173,25 @@ export class UserService implements IUserService {
     } catch (error) {
       this._logger.error(error.message, error);
       throw error;
+    }
+  }
+
+  private async _getCachedData(cacheKey: string): Promise<any> {
+    return (await this._redisCacheService.get(cacheKey)) as any;
+  }
+
+  private async _cacheResponse(data: any, cacheKey: string): Promise<void> {
+    await this._redisCacheService.set(
+      cacheKey,
+      data,
+      DEFAULT_CACHE_TIME_TO_LIVE,
+    );
+  }
+
+  private async _deleteUserPageCache(): Promise<void> {
+    const keys = await this._redisCacheService.keys('*list_user_page*');
+    if (keys.length > 0) {
+      await this._redisCacheService.deleteMany(keys);
     }
   }
 }
