@@ -4,16 +4,18 @@ import {
   InternalServerErrorException,
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { IBorrowedBookRepository, IListBorrowedBookResponse } from 'src/interface/repositories/borrowedBook.repositories.interface';
+import { BOOK_STATUS, TYPES } from 'src/infrastucture/constant';
+import { IContextAwareLogger } from 'src/infrastucture/logger';
+import {
+  IBorrowedBookRepository,
+  IListBorrowedBookResponse,
+} from 'src/interface/repositories/borrowedBook.repositories.interface';
+import { IBorrowedBookListInput } from 'src/interface/service/borrowedBook.service.interface';
 import { BorrowedBook } from 'src/modules/borrowedBook/borrowedBook';
 import { BorrowedBookMapper } from 'src/modules/borrowedBook/borrowedBook.mapper';
 import { LessThan, Repository } from 'typeorm';
 import { BorrowedBookModel } from '../models/borrowedBook.entity';
 import { GenericSqlRepository } from './generic.repository';
-import { BOOK_STATUS, TYPES } from 'src/infrastucture/constant';
-import { IContextAwareLogger } from 'src/infrastucture/logger';
-import { BookMapper } from 'src/modules/Book/Book.mapper';
-import { IBorrowedBookListInput } from 'src/interface/service/borrowedBook.service.interface';
 
 @Injectable()
 export class BorrowedBookRepository
@@ -89,7 +91,7 @@ export class BorrowedBookRepository
     input: IBorrowedBookListInput,
   ): Promise<IListBorrowedBookResponse> {
     try {
-      const { pageNum, pageSize, search } = input;
+      const { pageNum, pageSize, search, studentId, statuses } = input;
 
       const skip = (pageNum - 1) * pageSize;
       const take = pageSize;
@@ -100,7 +102,7 @@ export class BorrowedBookRepository
         .leftJoinAndSelect('borrow.book', 'book');
 
       if (search) {
-        queryBuilder.where(
+        queryBuilder.andWhere(
           ` LOWER(user.name) LIKE :search
             OR LOWER(user.matricOrStaffNo) LIKE :search
             OR LOWER(user.role) LIKE :search
@@ -108,6 +110,18 @@ export class BorrowedBookRepository
             OR LOWER(book.author) LIKE :search`,
           { search: `%${search.toLowerCase()}%` },
         );
+      }
+
+      if (statuses && statuses.length > 0) {
+        queryBuilder.andWhere('LOWER(borrow.status) IN (:...statuses)', {
+          statuses: statuses.map((s) => s.toLowerCase()),
+        });
+      }
+
+      if (studentId) {
+        queryBuilder.andWhere(` LOWER(user.id) LIKE :studentId`, {
+          studentId: `%${studentId}%`,
+        });
       }
 
       const [records, total] = await queryBuilder

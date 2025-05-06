@@ -21,6 +21,7 @@ import { IRedisService } from 'src/infrastucture/redis/redisInterface';
 import { IAudit } from 'src/interface/audit.interface';
 import { IBookRepository } from 'src/interface/repositories/book.repositories.interface';
 import { IBorrowedBookRepository } from 'src/interface/repositories/borrowedBook.repositories.interface';
+import { IBookService } from 'src/interface/service/Book.service.interface';
 import {
   IBorrowBook,
   IBorrowBookInput,
@@ -35,10 +36,6 @@ import { extractDateFromISOString, pagination } from 'src/utilities/utils';
 import { BookParser } from '../book/book.parser';
 import { BorrowedBook } from './borrowedBook';
 import { BorrowedBookParser } from './borrowedBook.parser';
-import {
-  IBookService,
-  IFindBookResponse,
-} from 'src/interface/service/Book.service.interface';
 
 @Injectable()
 export class BorrowedBookService implements IBorrowedBookService {
@@ -209,6 +206,43 @@ export class BorrowedBookService implements IBorrowedBookService {
         studentId: borrowedBook.user_id,
         returnDate: extractDateFromISOString(new Date().toISOString()),
       };
+    } catch (error) {
+      this._logger.error(error.message, error);
+      throw error;
+    }
+  }
+
+  async getBorrowBookByStudentId(
+    input: IBorrowedBookListInput,
+  ): Promise<IBorrowedBookListResponse> {
+    try {
+      const { pageNum, pageSize, statuses, search } = input;
+
+      const defaultPageSize = PAGINATION.defaultRecords;
+      input.pageSize = pageSize ?? defaultPageSize;
+
+      const cacheKey = `list_borrow_book_page${pageNum}_limit${pageSize}_searchBy${search}_filterBy${statuses}`;
+
+      const cachedData = await this._getCachedData(cacheKey);
+
+      if (cachedData && statuses.length > 0) {
+        return cachedData;
+      }
+
+      const borrows =
+        await this._borrowedBookRepository.listBorrowedBookByPagination(input);
+
+      const parsedBorrows = BorrowedBookParser.listBook(borrows.data);
+
+      const paginatedBorrows: IBorrowedBookListResponse = pagination(
+        parsedBorrows,
+        input,
+        borrows.total,
+      ) as unknown as IBorrowedBookListResponse;
+
+      await this._cacheResponse(paginatedBorrows, cacheKey);
+
+      return paginatedBorrows;
     } catch (error) {
       this._logger.error(error.message, error);
       throw error;

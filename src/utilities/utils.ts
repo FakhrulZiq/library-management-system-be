@@ -67,3 +67,23 @@ export const pagination = (
     data,
   };
 };
+
+export const getDaysRemaining = (
+  startDateISO: string,
+  middleDateISO: string,
+  endDateISO: string,
+): number => {
+  const startDate = new Date(startDateISO).getTime();
+  let endDate: number;
+
+  if (middleDateISO) {
+    endDate = new Date(middleDateISO).getTime();
+  } else {
+    endDate = new Date(endDateISO).getTime();
+  }
+
+  const diffMilliseconds = endDate - startDate;
+  const diffDays = Math.ceil(diffMilliseconds / (1000 * 60 * 60 * 24));
+
+  return diffDays;
+};

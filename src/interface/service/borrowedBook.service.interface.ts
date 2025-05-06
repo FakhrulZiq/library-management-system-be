@@ -10,6 +10,9 @@ export interface IBorrowedBookService {
     input: IBorrowedBookListInput,
   ): Promise<IBorrowedBookListResponse>;
   getBorrowedBookById(id: string): Promise<IBorrowedBookData>;
+  getBorrowBookByStudentId(
+    input: IBorrowedBookListInput,
+  ): Promise<IBorrowedBookListResponse>;
 }
 
 export interface IBorrowBook {
@@ -39,6 +42,8 @@ export interface IBorrowedBookListInput {
   search?: string;
   pageNum?: number;
   pageSize?: number;
+  studentId?: string;
+  statuses?: string[];
 }
 
 export interface IBorrowedBookListResponse {
@@ -55,6 +60,8 @@ export interface IBorrowedBookData {
   id: string;
   borrowDate: string;
   returnDate: string | null;
+  dueDate: string | null;
+  remainingDay: number;
   status: string;
   user: IBorrowedUser;
   book: IBorrowBookData | null;

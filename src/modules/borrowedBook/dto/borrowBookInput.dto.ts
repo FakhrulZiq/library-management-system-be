@@ -22,4 +22,10 @@ export class BorrowedBookListInput {
 
   @ApiProperty()
   pageSize?: number;
+
+  @ApiProperty()
+  studentId?: string;
+
+  @ApiProperty()
+  filter?: string;
 }
