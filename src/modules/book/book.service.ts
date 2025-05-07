@@ -13,6 +13,7 @@ import {
   TYPES,
 } from 'src/infrastucture/constant';
 import { IContextAwareLogger } from 'src/infrastucture/logger';
+import { IRedisService } from 'src/infrastucture/redis/redisInterface';
 import { IAudit } from 'src/interface/audit.interface';
 import {
   IBookRepository,
@@ -30,10 +31,9 @@ import {
   IListBookInpput,
   IUpdateBook,
 } from 'src/interface/service/book.service.interface';
+import { pagination } from 'src/utilities/utils';
 import { Book } from './book';
 import { BookParser } from './book.parser';
-import { IRedisService } from 'src/infrastucture/redis/redisInterface';
-import { pagination } from 'src/utilities/utils';
 
 @Injectable()
 export class BookService implements IBookService {
@@ -42,23 +42,22 @@ export class BookService implements IBookService {
     private readonly _logger: IContextAwareLogger,
     @Inject(TYPES.IBookRepository)
     private readonly _bookRepository: IBookRepository,
-    @Inject(TYPES.RedisCacheService)
+    @Inject(TYPES.IRedisService)
     protected readonly _redisCacheService: IRedisService,
   ) {}
 
   async listBook(input: IListBookInpput): Promise<IFindBookResponse> {
     try {
-      const { pageNum, pageSize } = input;
+      const { pageNum, pageSize, search } = input;
 
       const defaultPageSize = PAGINATION.defaultRecords;
       input.pageSize = pageSize ?? defaultPageSize;
 
-      const cacheKey = `membership_list_page${pageNum}_limit${pageSize}`;
+      const cacheKey = `list_book_page${pageNum}_limit${pageSize}_searchBy${search}`;
 
-      const cachedData: IFindBookResponse | null =
-        await this._getCachedData(cacheKey);
+      const cachedData = await this._getCachedData(cacheKey);
 
-      if (cachedData) {
+      if (cachedData && !input.search) {
         return cachedData;
       }
 
@@ -67,14 +66,18 @@ export class BookService implements IBookService {
 
       const parsedBook = BookParser.findBook(books.data);
 
-      const paginatedBook = pagination(parsedBook, input, books.total);
+      const paginatedBook: IFindBookResponse = pagination(
+        parsedBook,
+        input,
+        books.total,
+      ) as unknown as IFindBookResponse;
 
       await this._cacheResponse(paginatedBook, cacheKey);
 
       return paginatedBook;
     } catch (error) {
       this._logger.error(error.message, error);
-      throw new Error(error);
+      throw error;
     }
   }
 
@@ -95,6 +98,25 @@ export class BookService implements IBookService {
     }
   }
 
+  async getBookById(id: string): Promise<IFindBookData> {
+    try {
+      const book: Book = await this._bookRepository.findOne({
+        where: { id },
+      });
+
+      if (!book) {
+        throw new NotFoundException(`Book not found`);
+      }
+
+      const foundBook: IFindBookData = BookParser.updatedBook(book);
+
+      return foundBook;
+    } catch (error) {
+      this._logger.error(error.message, error);
+      throw error;
+    }
+  }
+
   async addManyBooks(
     inputs: IAddNewBookInput[],
     email: string,
@@ -106,6 +128,7 @@ export class BookService implements IBookService {
       try {
         const result: IAddOneBookResponse = await this.addOneBook(input, email);
         success.push(result);
+        await this.deleteBookPageCache();
       } catch (err) {
         failed.push(input.title);
       }
@@ -119,7 +142,8 @@ export class BookService implements IBookService {
     email: string,
   ): Promise<IAddOneBookResponse> {
     try {
-      const { title, author, barcodeNo, published_year, quantity } = input;
+      const { title, author, barcodeNo, published_year, quantity, price } =
+        input;
 
       const auditProps: IAudit = Audit.createAuditProperties(
         email,
@@ -133,6 +157,7 @@ export class BookService implements IBookService {
         barcodeNo,
         published_year,
         quantity,
+        price,
         audit,
       }).getValue();
 
@@ -145,26 +170,20 @@ export class BookService implements IBookService {
       return { message: 'Book added successfully' };
     } catch (error) {
       this._logger.error(error.message, error);
-      throw new Error(error);
+      throw error;
     }
   }
 
-  async updateBook(input: IUpdateBook, email: string): Promise<IFindBookData> {
+  async updateBook(
+    id: string,
+    input: IUpdateBook,
+    email: string,
+  ): Promise<IFindBookData> {
     try {
-      const { id, title, author, barcodeNo, published_year, quantity } = input;
-
-      const updateData = {
-        title,
-        author,
-        barcodeNo,
-        published_year,
-        quantity,
-      };
-
       const book: Book = await this._bookRepository.findOne({ where: { id } });
 
       if (!book) {
-        throw new NotFoundException(`There is no book with ID ${input.id}`);
+        throw new NotFoundException(`There is no book with ID ${id}`);
       }
 
       const auditProps: IAudit = Audit.createAuditProperties(
@@ -173,7 +192,7 @@ export class BookService implements IBookService {
       );
       const audit: Audit = Audit.create(auditProps).getValue();
 
-      const bookUpdate = Book.update(updateData, book, audit);
+      const bookUpdate = Book.update(input, book, audit);
 
       const updatedBook: Book = await this._bookRepository.save(bookUpdate);
 
@@ -181,10 +200,12 @@ export class BookService implements IBookService {
         throw new InternalServerErrorException(`Failed to update book`);
       }
 
+      await this.deleteBookPageCache();
+
       return BookParser.updatedBook(updatedBook);
     } catch (error) {
       this._logger.error(error.message, error);
-      throw new Error(error);
+      throw error;
     }
   }
 
@@ -196,24 +217,46 @@ export class BookService implements IBookService {
         throw new NotFoundException(`There is no book with ID ${id}`);
       }
 
-      const auditProps: IAudit = Audit.createAuditProperties(
+      let updatedBook: Book;
+      const updateAuditProps: IAudit = Audit.createAuditProperties(
+        email,
+        CRUD_ACTION.update,
+      );
+      const updateAudit: Audit = Audit.create(updateAuditProps).getValue();
+
+      const deleteAuditProps: IAudit = Audit.createAuditProperties(
         email,
         CRUD_ACTION.delete,
       );
-      const audit: Audit = Audit.create(auditProps).getValue();
+      const deleteAudit: Audit = Audit.create(deleteAuditProps).getValue();
 
-      const bookUpdate = Book.update(book, book, audit);
-
-      const updatedBook: Book = await this._bookRepository.save(bookUpdate);
+      if (book.quantity > 1) {
+        const updatedQuantity = book.quantity - 1;
+        const bookUpdate = Book.update(
+          { ...book, quantity: updatedQuantity },
+          book,
+          updateAudit,
+        );
+        updatedBook = await this._bookRepository.save(bookUpdate);
+      } else {
+        const bookUpdate = Book.update(
+          { ...book, quantity: 0 },
+          book,
+          deleteAudit,
+        );
+        updatedBook = await this._bookRepository.save(bookUpdate);
+      }
 
       if (!updatedBook) {
         throw new InternalServerErrorException(`Failed to delete book`);
       }
 
+      await this.deleteBookPageCache();
+
       return { message: 'Book deleted successfully!' };
     } catch (error) {
       this._logger.error(error.message, error);
-      throw new Error(error);
+      throw error;
     }
   }
 
@@ -227,5 +270,12 @@ export class BookService implements IBookService {
       data,
       DEFAULT_CACHE_TIME_TO_LIVE,
     );
+  }
+
+  async deleteBookPageCache(): Promise<void> {
+    const keys = await this._redisCacheService.keys('*list_book_page*');
+    if (keys.length > 0) {
+      await this._redisCacheService.deleteMany(keys);
+    }
   }
 }

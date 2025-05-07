@@ -8,6 +8,7 @@ import { BookController } from './book.controller';
 import { BookMapper } from './book.mapper';
 import { BookService } from './book.service';
 import { RedisCacheService } from 'src/infrastucture/redis/redisService';
+import { RedisClientProvider } from 'src/infrastucture/redis/redis.provider';
 
 @Module({
   imports: [TypeOrmModule.forFeature([BookModel])],
@@ -22,7 +23,8 @@ import { RedisCacheService } from 'src/infrastucture/redis/redisService';
       useClass: BookRepository,
     },
     { provide: TYPES.IApplicationLogger, useClass: ApplicationLogger },
-    { provide: TYPES.RedisCacheService, useClass: RedisCacheService },
+    { provide: TYPES.IRedisService, useClass: RedisCacheService },
+    RedisClientProvider,
     BookMapper,
   ],
 })

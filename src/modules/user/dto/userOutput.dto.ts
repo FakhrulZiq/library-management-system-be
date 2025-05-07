@@ -5,7 +5,12 @@ export class RegisterResponse {
   message: string;
 }
 
+export class DeleteResponse extends RegisterResponse {}
+
 export class UserByIdResponse {
+  @ApiProperty()
+  id: string;
+
   @ApiProperty()
   email: string;
 
@@ -16,5 +21,31 @@ export class UserByIdResponse {
   name: string;
 
   @ApiProperty()
+  status: string;
+
+  @ApiProperty()
   matricOrStaffNo: string;
+}
+
+export class FindUserResponse {
+  @ApiProperty()
+  data: UserByIdResponse[];
+
+  @ApiProperty()
+  startRecord: number;
+
+  @ApiProperty()
+  endRecord: number;
+
+  @ApiProperty()
+  total?: number;
+
+  @ApiProperty()
+  pageSize?: number;
+
+  @ApiProperty()
+  totalPages?: number;
+
+  @ApiProperty()
+  nextPage?: number;
 }

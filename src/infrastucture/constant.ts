@@ -13,14 +13,22 @@ export const TYPES = {
   IBookRepository: 'IBookRepository',
   IBookService: 'IBookService',
   RedisCacheService: 'RedisCacheService',
+  IBorrowedBookRepository: 'IBorrowedBookRepository',
+  IBorrowedBookService: 'IBorrowedBookService',
+  IRedisService: 'IRedisService',
 };
 
 export const ROLES_KEY = 'roles';
 
-export const STATUS = {
+export const USER_STATUS = {
   ACTIVE: 'Active',
   INACTIVE: 'Inactive',
   BANNED: 'Banned',
+};
+
+export const BOOK_STATUS = {
+  BORROWED: 'Borrowed',
+  RETURNED: 'Returned',
 };
 
 export const PAGINATION = {
@@ -28,3 +36,5 @@ export const PAGINATION = {
 };
 
 export const DEFAULT_CACHE_TIME_TO_LIVE = 60 * 60 * 24;
+
+export const MAX_BORROW_LIMIT = 5;

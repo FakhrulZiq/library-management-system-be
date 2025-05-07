@@ -1,4 +1,5 @@
 import { ApiProperty } from '@nestjs/swagger';
+import { FindBookData } from './bookInput.dto';
 
 export class AddBookResponse {
   @ApiProperty()
@@ -16,3 +17,26 @@ export class BookResponseMessage {
 export class AddOneBookResponse extends BookResponseMessage {}
 
 export class DeleteBookResponse extends BookResponseMessage {}
+
+export class FindBookResponse {
+  @ApiProperty()
+  data: FindBookData[];
+
+  @ApiProperty()
+  startRecord: number;
+
+  @ApiProperty()
+  endRecord: number;
+
+  @ApiProperty()
+  total?: number;
+
+  @ApiProperty()
+  pageSize?: number;
+
+  @ApiProperty()
+  totalPages?: number;
+
+  @ApiProperty()
+  nextPage?: number;
+}

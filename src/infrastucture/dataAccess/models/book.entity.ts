@@ -19,6 +19,9 @@ export class BookModel extends BaseModel {
   @Column()
   quantity: number;
 
+  @Column()
+  price: number;
+
   @OneToMany(
     () => BorrowedBookModel,
     (borrowedBook: BorrowedBookModel) => borrowedBook.book,

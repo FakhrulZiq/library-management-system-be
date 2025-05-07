@@ -6,6 +6,7 @@ import {
   Inject,
   Param,
   Post,
+  Put,
   Req,
   UseGuards,
 } from '@nestjs/common';
@@ -19,11 +20,10 @@ import {
   AddNewBookInput,
   FindBookData,
   FindBookInput,
-  FindBookResponse,
   ListBookInput,
   UpdateBookInput,
 } from './dto/bookInput.dto';
-import { AddBookResponse, DeleteBookResponse } from './dto/bookOutput.dto';
+import { AddBookResponse, DeleteBookResponse, FindBookResponse } from './dto/bookOutput.dto';
 
 @ApiTags('book')
 @ApiBearerAuth()
@@ -34,7 +34,7 @@ export class BookController {
     private readonly _bookService: IBookService,
   ) {}
 
-  @Get('listBook')
+  @Post('listBook')
   @UseGuards(JwtAuthGuard)
   @ApiOperation({ summary: 'List all books' })
   async listBooks(@Body() input: ListBookInput): Promise<FindBookResponse> {
@@ -61,16 +61,24 @@ export class BookController {
     return this._bookService.findBook(input);
   }
 
-  @Post('updateBook')
+  @Get(':id')
+  @UseGuards(JwtAuthGuard)
+  @ApiOperation({ summary: 'Get book by ID' })
+  getBookById(@Param('id') id: string): Promise<FindBookData> {
+    return this._bookService.getBookById(id);
+  }
+
+  @Put(':id')
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles('admin', 'librarian')
   @ApiOperation({ summary: 'Update books' })
   async updateBook(
+    @Param('id') id: string,
     @Body() input: UpdateBookInput,
     @Req() req,
   ): Promise<FindBookData> {
     const email = req.user.email;
-    return this._bookService.updateBook(input, email);
+    return this._bookService.updateBook(id, input, email);
   }
 
   @Delete(':id')
