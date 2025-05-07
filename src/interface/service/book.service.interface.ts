@@ -17,6 +17,7 @@ export interface IUpdateBook {
   barcodeNo: string;
   published_year: string;
   quantity: number;
+  price: number;
 }
 
 export interface IAddNewBookInput {
@@ -25,6 +26,7 @@ export interface IAddNewBookInput {
   barcodeNo: string;
   published_year: string;
   quantity: number;
+  price: number;
 }
 
 export interface IAddBookResponse {
@@ -62,6 +64,7 @@ export interface IFindBookData {
   published_year: string;
   quantity: number;
   barcodeNo: string;
+  price: number;
 }
 
 export interface IListBookInpput {
