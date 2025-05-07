@@ -57,7 +57,7 @@ export class BorrowedBookController {
   async returnBook(
     @Body() input: ReturnBookInput,
     @Req() req,
-  ): Promise<ReturnBookOutput> {
+  ): Promise<BorrowedBookData> {
     const email = req.user.email;
     return this._borrowedBookService.returnBook(input, email);
   }

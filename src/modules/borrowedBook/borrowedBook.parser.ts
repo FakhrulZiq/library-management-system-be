@@ -13,6 +13,7 @@ export class BorrowedBookParser {
         borrowDate: extractDateFromISOString(borrowedBook?.borrow_date),
         returnDate: extractDateFromISOString(borrowedBook?.return_date),
         dueDate: extractDateFromISOString(borrowedBook?.due_date),
+        fine: borrowedBook?.fine,
         remainingDay: getDaysRemaining(
           borrowedBook.borrow_date,
           borrowedBook.return_date,
@@ -29,6 +30,7 @@ export class BorrowedBookParser {
           ? {
               title: borrowedBook.book.title,
               author: borrowedBook.book.author,
+              price: borrowedBook.book?.price,
             }
           : null,
       };
@@ -42,6 +44,7 @@ export class BorrowedBookParser {
       borrowDate: extractDateFromISOString(borrowedBook?.borrow_date),
       returnDate: extractDateFromISOString(borrowedBook?.return_date),
       dueDate: extractDateFromISOString(borrowedBook?.due_date),
+      fine: borrowedBook?.fine,
       remainingDay: getDaysRemaining(
         borrowedBook.borrow_date,
         borrowedBook.return_date,
@@ -58,6 +61,7 @@ export class BorrowedBookParser {
         ? {
             title: borrowedBook.book.title,
             author: borrowedBook.book.author,
+            price: borrowedBook.book?.price,
           }
         : null,
     };

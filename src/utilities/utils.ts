@@ -78,14 +78,14 @@ export const getDaysRemaining = (
   let endDate: number;
 
   if (middleDateISO) {
-    endDate = new Date(middleDateISO).getTime();
+    return null;
   } else {
     endDate = new Date(endDateISO).getTime();
     startDate = new Date().getTime();
   }
 
   const diffMilliseconds = endDate - startDate;
-  const diffDays = Math.ceil(diffMilliseconds / (1000 * 60 * 60 * 24));
+  const diffDays = Math.floor(diffMilliseconds / (1000 * 60 * 60 * 24));
 
   return diffDays;
 };

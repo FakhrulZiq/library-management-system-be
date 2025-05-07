@@ -5,7 +5,7 @@ export interface IBorrowedBookService {
   returnBook(
     input: IReturnBookInput,
     email: string,
-  ): Promise<IReturnBookOutput>;
+  ): Promise<IBorrowedBookData>;
   getAllBorrowedBook(
     input: IBorrowedBookListInput,
   ): Promise<IBorrowedBookListResponse>;
@@ -29,6 +29,8 @@ export interface IBorrowBookInput {
 
 export interface IReturnBookInput {
   borrowedBookId: string;
+  status: string;
+  fine: number | null;
 }
 
 export interface IReturnBookOutput {
@@ -61,6 +63,7 @@ export interface IBorrowedBookData {
   borrowDate: string;
   returnDate: string | null;
   dueDate: string | null;
+  fine: number | null;
   remainingDay: number;
   status: string;
   user: IBorrowedUser;
@@ -75,4 +78,5 @@ interface IBorrowedUser {
 interface IBorrowBookData {
   title: string;
   author: string;
+  price: number;
 }

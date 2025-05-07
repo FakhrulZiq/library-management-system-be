@@ -72,6 +72,9 @@ export class BorrowedBookData {
   status: string;
 
   @ApiProperty()
+  fine: number | null;
+
+  @ApiProperty()
   user: BorrowedUser;
 
   @ApiProperty()
@@ -92,4 +95,7 @@ class BorrowBookData {
 
   @ApiProperty()
   author: string;
+
+  @ApiProperty()
+  price: number;
 }

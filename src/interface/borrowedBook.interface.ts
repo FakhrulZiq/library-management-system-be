@@ -7,6 +7,7 @@ export interface IBorrowedBook {
   user_id: string;
   book_id: string;
   return_date?: string;
+  fine?: number;
   due_date: string;
   status: string;
   user?: User;

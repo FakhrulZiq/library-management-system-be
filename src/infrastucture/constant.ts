@@ -29,6 +29,7 @@ export const USER_STATUS = {
 export const BOOK_STATUS = {
   BORROWED: 'Borrowed',
   RETURNED: 'Returned',
+  LOSTED: 'Losted',
 };
 
 export const PAGINATION = {
