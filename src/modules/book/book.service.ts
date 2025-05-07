@@ -172,9 +172,9 @@ export class BookService implements IBookService {
     }
   }
 
-  async updateBook(input: IUpdateBook, email: string): Promise<IFindBookData> {
+  async updateBook(id: string, input: IUpdateBook, email: string): Promise<IFindBookData> {
     try {
-      const { id, title, author, barcodeNo, published_year, quantity } = input;
+      const { title, author, barcodeNo, published_year, quantity } = input;
 
       const updateData = {
         title,
@@ -187,7 +187,7 @@ export class BookService implements IBookService {
       const book: Book = await this._bookRepository.findOne({ where: { id } });
 
       if (!book) {
-        throw new NotFoundException(`There is no book with ID ${input.id}`);
+        throw new NotFoundException(`There is no book with ID ${id}`);
       }
 
       const auditProps: IAudit = Audit.createAuditProperties(

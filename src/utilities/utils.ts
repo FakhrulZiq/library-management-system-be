@@ -74,13 +74,14 @@ export const getDaysRemaining = (
   middleDateISO: string,
   endDateISO: string,
 ): number => {
-  const startDate = new Date(startDateISO).getTime();
+  let startDate = new Date(startDateISO).getTime();
   let endDate: number;
 
   if (middleDateISO) {
     endDate = new Date(middleDateISO).getTime();
   } else {
     endDate = new Date(endDateISO).getTime();
+    startDate = new Date().getTime();
   }
 
   const diffMilliseconds = endDate - startDate;

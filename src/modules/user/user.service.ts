@@ -3,6 +3,7 @@ import {
   ConflictException,
   Inject,
   Injectable,
+  InternalServerErrorException,
   NotFoundException,
 } from '@nestjs/common';
 import * as bcrypt from 'bcrypt';
@@ -18,6 +19,7 @@ import { IContextAwareLogger } from 'src/infrastucture/logger';
 import { IAudit } from 'src/interface/audit.interface';
 import { IUserRepository } from 'src/interface/repositories/user.repositories.interface';
 import {
+  IDeleteResponse,
   IFindUserResponse,
   IListUserInput,
   IRegisterResponse,
@@ -170,6 +172,37 @@ export class UserService implements IUserService {
 
       user.refreshToken = null;
       await this._userRepository.save(user);
+    } catch (error) {
+      this._logger.error(error.message, error);
+      throw error;
+    }
+  }
+
+  async deleteUser(id: string, email: string): Promise<IDeleteResponse> {
+    try {
+      const user = await this._userRepository.findOne({ where: { id } });
+
+      if (!user) {
+        throw new NotFoundException('User not found');
+      }
+
+      const deleteAuditProps: IAudit = Audit.createAuditProperties(
+        email,
+        CRUD_ACTION.delete,
+      );
+      const deleteAudit: Audit = Audit.create(deleteAuditProps).getValue();
+
+      const userDelete = User.update(user, user, deleteAudit);
+
+      const saveDelete = await this._userRepository.save(userDelete);
+
+      if (!saveDelete) {
+        throw new InternalServerErrorException(`Failed to delete book`);
+      }
+
+      await this._deleteUserPageCache();
+
+      return { message: 'User deleted successfully!' };
     } catch (error) {
       this._logger.error(error.message, error);
       throw error;

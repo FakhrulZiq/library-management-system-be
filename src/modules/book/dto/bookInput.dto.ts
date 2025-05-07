@@ -61,9 +61,6 @@ export class FindBookData {
 
 export class UpdateBookInput {
   @ApiProperty()
-  id: string;
-
-  @ApiProperty()
   title: string;
 
   @ApiProperty()
