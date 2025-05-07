@@ -1,10 +1,12 @@
 import {
   Body,
   Controller,
+  Delete,
   Get,
   Inject,
   Param,
   Post,
+  Req,
   UseGuards,
 } from '@nestjs/common';
 import { TYPES } from 'src/infrastucture/constant';
@@ -13,6 +15,7 @@ import {
   IUserService,
 } from 'src/interface/service/user.service.interface';
 import {
+  DeleteResponse,
   FindUserResponse,
   RegisterResponse,
   UserByIdResponse,
@@ -39,7 +42,7 @@ export class UserController {
 
   @Post('listUser')
   @UseGuards(JwtAuthGuard, RolesGuard)
-  @Roles('admin')
+  @Roles('admin', 'librarian')
   @ApiOperation({ summary: 'List all user' })
   async listuser(@Body() input: ListUserInput): Promise<FindUserResponse> {
     return this._userService.getUser(input);
@@ -59,7 +62,6 @@ export class UserController {
 
   @Post('register')
   @UseGuards()
-  @Roles('admin')
   @ApiOperation({ summary: 'Register a new user' })
   @ApiResponse({
     status: 201,
@@ -68,5 +70,14 @@ export class UserController {
   })
   registerUser(@Body() input: RegisterInput): Promise<RegisterResponse> {
     return this._userService.register(input);
+  }
+
+  @Delete(':id')
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles('admin', 'librarian')
+  @ApiOperation({ summary: 'Delete User by ID' })
+  deleteUser(@Param('id') id: string, @Req() req): Promise<DeleteResponse> {
+    const email = req.user.email;
+    return this._userService.deleteUser(id, email);
   }
 }

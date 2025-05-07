@@ -5,6 +5,8 @@ export class RegisterResponse {
   message: string;
 }
 
+export class DeleteResponse extends RegisterResponse {}
+
 export class UserByIdResponse {
   @ApiProperty()
   id: string;

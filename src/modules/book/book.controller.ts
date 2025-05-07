@@ -6,6 +6,7 @@ import {
   Inject,
   Param,
   Post,
+  Put,
   Req,
   UseGuards,
 } from '@nestjs/common';
@@ -67,16 +68,17 @@ export class BookController {
     return this._bookService.getBookById(id);
   }
 
-  @Post('updateBook')
+  @Put(':id')
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles('admin', 'librarian')
   @ApiOperation({ summary: 'Update books' })
   async updateBook(
+    @Param('id') id: string,
     @Body() input: UpdateBookInput,
     @Req() req,
   ): Promise<FindBookData> {
     const email = req.user.email;
-    return this._bookService.updateBook(input, email);
+    return this._bookService.updateBook(id, input, email);
   }
 
   @Delete(':id')

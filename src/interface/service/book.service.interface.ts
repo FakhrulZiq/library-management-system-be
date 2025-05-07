@@ -4,7 +4,7 @@ export interface IBookService {
     email: string,
   ): Promise<IAddBookResponse>;
   findBook(input: IFindBookInput): Promise<IFindBookData[]>;
-  updateBook(input: IUpdateBook, email: string): Promise<IFindBookData>;
+  updateBook(id: string, input: IUpdateBook, email: string): Promise<IFindBookData>;
   listBook(input: IListBookInpput): Promise<IFindBookResponse>;
   deleteBook(id: string, email: string): Promise<IDeleteBookResponse>;
   deleteBookPageCache(): Promise<void>;
@@ -12,7 +12,6 @@ export interface IBookService {
 }
 
 export interface IUpdateBook {
-  id: string;
   title: string;
   author: string;
   barcodeNo: string;
@@ -33,7 +32,7 @@ export interface IAddBookResponse {
   failed: string[];
 }
 
-export interface IMessageResponse {
+interface IMessageResponse {
   message: string;
 }
 

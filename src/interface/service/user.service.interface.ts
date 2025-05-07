@@ -6,6 +6,7 @@ export interface IUserService {
   findByEmail(email: string): Promise<User>;
   clearRefreshToken(id: string): Promise<void>;
   getUser(input: IListUserInput): Promise<IFindUserResponse>;
+  deleteUser(id: string, email: string): Promise<IDeleteResponse>;
 }
 
 export interface IResgisterInput {
@@ -16,9 +17,13 @@ export interface IResgisterInput {
   matricOrStaffNo: string;
 }
 
-export interface IRegisterResponse {
+interface IMessageResponse {
   message: string;
 }
+
+export interface IRegisterResponse extends IMessageResponse {}
+
+export interface IDeleteResponse extends IMessageResponse {}
 
 export interface IUserByID {
   id: string;
