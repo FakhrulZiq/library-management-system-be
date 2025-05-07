@@ -142,7 +142,8 @@ export class BookService implements IBookService {
     email: string,
   ): Promise<IAddOneBookResponse> {
     try {
-      const { title, author, barcodeNo, published_year, quantity } = input;
+      const { title, author, barcodeNo, published_year, quantity, price } =
+        input;
 
       const auditProps: IAudit = Audit.createAuditProperties(
         email,
@@ -156,6 +157,7 @@ export class BookService implements IBookService {
         barcodeNo,
         published_year,
         quantity,
+        price,
         audit,
       }).getValue();
 
@@ -172,18 +174,12 @@ export class BookService implements IBookService {
     }
   }
 
-  async updateBook(id: string, input: IUpdateBook, email: string): Promise<IFindBookData> {
+  async updateBook(
+    id: string,
+    input: IUpdateBook,
+    email: string,
+  ): Promise<IFindBookData> {
     try {
-      const { title, author, barcodeNo, published_year, quantity } = input;
-
-      const updateData = {
-        title,
-        author,
-        barcodeNo,
-        published_year,
-        quantity,
-      };
-
       const book: Book = await this._bookRepository.findOne({ where: { id } });
 
       if (!book) {
@@ -196,7 +192,7 @@ export class BookService implements IBookService {
       );
       const audit: Audit = Audit.create(auditProps).getValue();
 
-      const bookUpdate = Book.update(updateData, book, audit);
+      const bookUpdate = Book.update(input, book, audit);
 
       const updatedBook: Book = await this._bookRepository.save(bookUpdate);
 

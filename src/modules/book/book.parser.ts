@@ -11,13 +11,15 @@ export class BookParser {
         published_year: book.published_year,
         quantity: book.quantity,
         barcodeNo: book.barcodeNo,
+        price: book.price,
       };
     });
     return data;
   }
 
   static updatedBook(book: Book): IFindBookData {
-    const { id, title, author, published_year, quantity, barcodeNo } = book;
+    const { id, title, author, published_year, quantity, price, barcodeNo } =
+      book;
     return {
       id: id,
       bookTitle: title,
@@ -25,6 +27,7 @@ export class BookParser {
       published_year,
       quantity,
       barcodeNo,
+      price,
     };
   }
 }

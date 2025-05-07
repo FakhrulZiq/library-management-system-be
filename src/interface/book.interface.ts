@@ -1,4 +1,4 @@
-import { Audit } from "src/domain/audit/audit";
+import { Audit } from 'src/domain/audit/audit';
 
 export interface IBook {
   title: string;
@@ -6,5 +6,6 @@ export interface IBook {
   barcodeNo: string;
   published_year: string;
   quantity: number;
+  price: number;
   audit: Audit;
-}  
+}

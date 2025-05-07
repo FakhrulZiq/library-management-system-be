@@ -17,6 +17,9 @@ export class AddNewBookInput {
   quantity: number;
 
   @ApiProperty()
+  price: number;
+
+  @ApiProperty()
   email: string;
 }
 
@@ -56,6 +59,9 @@ export class FindBookData {
   quantity: number;
 
   @ApiProperty()
+  price: number;
+
+  @ApiProperty()
   barcodeNo: string;
 }
 
@@ -74,6 +80,9 @@ export class UpdateBookInput {
 
   @ApiProperty()
   quantity: number;
+
+  @ApiProperty()
+  price: number;
 
   @ApiProperty()
   email: string;
