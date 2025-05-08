@@ -39,7 +39,6 @@ export class AuthController {
   }
 
   @Put('reset-password')
-  @UseGuards(JwtAuthGuard)
   @ApiOperation({ summary: 'Update password' })
   async updatePassowrd(
     @Body() input: ResetPasswordInput,
