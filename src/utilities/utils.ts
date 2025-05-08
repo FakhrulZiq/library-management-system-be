@@ -37,8 +37,16 @@ export const updateEntity = (
 
 export const extractDateFromISOString = (ISODate: string): string => {
   if (!ISODate) return '-';
-  const [datePart] = ISODate.split('T');
-  return datePart;
+
+  const date = new Date(ISODate);
+
+  if (isNaN(date.getTime())) return '-';
+
+  const day = String(date.getDate()).padStart(2, '0');
+  const month = String(date.getMonth() + 1).padStart(2, '0');
+  const year = date.getFullYear();
+
+  return `${day}-${month}-${year}`;
 };
 
 /**

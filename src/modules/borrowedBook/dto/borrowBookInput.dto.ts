@@ -35,3 +35,8 @@ export class BorrowedBookListInput {
   @ApiProperty()
   filter?: string;
 }
+
+export class DashboardCardInput {
+  @ApiProperty()
+  userId: string;
+}

@@ -7,13 +7,15 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { BOOK_STATUS, TYPES } from 'src/infrastucture/constant';
 import { IContextAwareLogger } from 'src/infrastucture/logger';
 import {
+  IBorrowedBookDashboard,
   IBorrowedBookRepository,
   IListBorrowedBookResponse,
+  ITrendingBook,
 } from 'src/interface/repositories/borrowedBook.repositories.interface';
 import { IBorrowedBookListInput } from 'src/interface/service/borrowedBook.service.interface';
 import { BorrowedBook } from 'src/modules/borrowedBook/borrowedBook';
 import { BorrowedBookMapper } from 'src/modules/borrowedBook/borrowedBook.mapper';
-import { LessThan, Repository } from 'typeorm';
+import { LessThan, MoreThanOrEqual, Repository } from 'typeorm';
 import { BorrowedBookModel } from '../models/borrowedBook.entity';
 import { GenericSqlRepository } from './generic.repository';
 
@@ -138,5 +140,132 @@ export class BorrowedBookRepository
     } catch (error) {
       throw new InternalServerErrorException(error);
     }
+  }
+
+  async borrowedBookDashboard(): Promise<IBorrowedBookDashboard> {
+    try {
+      const result = await this.repository
+        .createQueryBuilder('borrowed_book')
+        .select([
+          `SUM(CASE WHEN borrowed_book.status = 'Borrowed' THEN 1 ELSE 0 END) AS borrowedCount`,
+          `SUM(CASE WHEN borrowed_book.status = 'Losted' THEN 1 ELSE 0 END) AS lostedCount`,
+          `SUM(borrowed_book.fine) AS totalFine`,
+        ])
+        .getRawOne();
+
+      return {
+        borrowedCount: parseInt(result.borrowedCount, 10) || 0,
+        lostedCount: parseInt(result.lostedCount, 10) || 0,
+        totalFine: parseInt(result.totalFine, 10) || 0,
+      };
+    } catch (error) {
+      throw new InternalServerErrorException(error);
+    }
+  }
+
+  async studentBorrowedBookDashboard(
+    userId: string,
+  ): Promise<IBorrowedBookDashboard> {
+    try {
+      const queryBuilder = this.repository
+        .createQueryBuilder('borrowed_book')
+        .select([
+          `SUM(CASE WHEN borrowed_book.status = 'Borrowed' THEN 1 ELSE 0 END) AS borrowedCount`,
+          `SUM(CASE WHEN borrowed_book.status = 'Losted' THEN 1 ELSE 0 END) AS lostedCount`,
+          `SUM(borrowed_book.fine) AS totalFine`,
+        ])
+        .where('borrowed_book.user_id = :userId', { userId });
+
+      const result = await queryBuilder.getRawOne();
+
+      return {
+        borrowedCount: parseInt(result.borrowedCount, 10) || 0,
+        lostedCount: parseInt(result.lostedCount, 10) || 0,
+        totalFine: parseInt(result.totalFine, 10) || 0,
+      };
+    } catch (error) {
+      throw new InternalServerErrorException(error);
+    }
+  }
+
+  async getTrendingBooks(): Promise<ITrendingBook[]> {
+    try {
+      const queryBuilder = this.repository
+        .createQueryBuilder('borrowed_book')
+        .select([
+          'book.id AS id',
+          'book.title AS title',
+          'book.author AS author',
+          'COUNT(borrowed_book.book_id) AS borrowCount',
+        ])
+        .innerJoin('borrowed_book.book', 'book')
+        .groupBy('borrowed_book.book_id, book.title, book.author')
+        .having('COUNT(borrowed_book.book_id) > 1')
+        .orderBy('borrowCount', 'DESC')
+        .limit(5);
+
+      const results = await queryBuilder.getRawMany();
+
+      const data = results.map((book) => ({
+        id: book.id,
+        title: book.title,
+        author: book.author,
+        borrowCount: parseInt(book.borrowCount, 10) || 0,
+      }));
+
+      return data;
+    } catch (error) {
+      throw new InternalServerErrorException(error);
+    }
+  }
+
+  async getRecentActivity(): Promise<BorrowedBook[]> {
+    const recentActivities: BorrowedBookModel[] = await this.repository.find({
+      relations: ['book', 'user'],
+      order: { borrow_date: 'DESC' },
+      take: 5,
+    });
+
+    return recentActivities.map((recent) => this.mapper.toDomain(recent));
+  }
+
+  async getRecentActivityByStudent(user_id: string): Promise<BorrowedBook[]> {
+    const recentActivities: BorrowedBookModel[] = await this.repository.find({
+      relations: ['book', 'user'],
+      where: { user_id },
+      order: { borrow_date: 'DESC' },
+      take: 5,
+    });
+
+    return recentActivities.map((recent) => this.mapper.toDomain(recent));
+  }
+
+  async getIncomingDue(): Promise<BorrowedBook[]> {
+    const upcomingDueBooks: BorrowedBookModel[] = await this.repository.find({
+      relations: ['book', 'user'],
+      where: {
+        status: 'Borrowed',
+        due_date: MoreThanOrEqual(new Date().toISOString()),
+      },
+      order: { due_date: 'ASC' },
+      take: 3,
+    });
+
+    return upcomingDueBooks.map((book) => this.mapper.toDomain(book));
+  }
+
+  async getIncomingDueByStudent(user_id: string): Promise<BorrowedBook[]> {
+    const upcomingDueBooks: BorrowedBookModel[] = await this.repository.find({
+      relations: ['book', 'user'],
+      where: {
+        status: 'Borrowed',
+        due_date: MoreThanOrEqual(new Date().toISOString()),
+        user_id
+      },
+      order: { due_date: 'ASC' },
+      take: 3,
+    });
+
+    return upcomingDueBooks.map((book) => this.mapper.toDomain(book));
   }
 }

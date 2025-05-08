@@ -15,12 +15,18 @@ import {
   MAX_BORROW_LIMIT,
   PAGINATION,
   TYPES,
+  USER_ROLE,
 } from 'src/infrastucture/constant';
 import { IContextAwareLogger } from 'src/infrastucture/logger';
 import { IRedisService } from 'src/infrastucture/redis/redisInterface';
 import { IAudit } from 'src/interface/audit.interface';
 import { IBookRepository } from 'src/interface/repositories/book.repositories.interface';
-import { IBorrowedBookRepository } from 'src/interface/repositories/borrowedBook.repositories.interface';
+import {
+  IBorrowedBookDashboard,
+  IBorrowedBookDashboardResponse,
+  IBorrowedBookRepository,
+  ITrendingBook,
+} from 'src/interface/repositories/borrowedBook.repositories.interface';
 import { IBookService } from 'src/interface/service/Book.service.interface';
 import {
   IBorrowBook,
@@ -29,8 +35,9 @@ import {
   IBorrowedBookListInput,
   IBorrowedBookListResponse,
   IBorrowedBookService,
+  IIncomingDueResponse,
+  IRecentActivityResponse,
   IReturnBookInput,
-  IReturnBookOutput,
 } from 'src/interface/service/borrowedBook.service.interface';
 import { extractDateFromISOString, pagination } from 'src/utilities/utils';
 import { BookParser } from '../book/book.parser';
@@ -243,6 +250,90 @@ export class BorrowedBookService implements IBorrowedBookService {
       await this._cacheResponse(paginatedBorrows, cacheKey);
 
       return paginatedBorrows;
+    } catch (error) {
+      this._logger.error(error.message, error);
+      throw error;
+    }
+  }
+
+  async dashboardCard(
+    userId: string,
+    role: string,
+  ): Promise<IBorrowedBookDashboardResponse> {
+    try {
+      let borrowedBook: IBorrowedBookDashboard;
+      let totalAvailableBook: number;
+      if (role === USER_ROLE.STUDENT) {
+        borrowedBook =
+          await this._borrowedBookRepository.studentBorrowedBookDashboard(
+            userId,
+          );
+        totalAvailableBook = 0;
+      } else {
+        borrowedBook =
+          await this._borrowedBookRepository.borrowedBookDashboard();
+        totalAvailableBook = await this._bookRepository.totalAvailableBook();
+      }
+
+      return { totalAvailableBook, ...borrowedBook };
+    } catch (error) {
+      this._logger.error(error.message, error);
+      throw error;
+    }
+  }
+
+  async trendingBook(): Promise<ITrendingBook[]> {
+    try {
+      const trending = await this._borrowedBookRepository.getTrendingBooks();
+      return trending;
+    } catch (error) {
+      this._logger.error(error.message, error);
+      throw error;
+    }
+  }
+
+  async recentActivities(): Promise<IRecentActivityResponse[]> {
+    try {
+      const recent = await this._borrowedBookRepository.getRecentActivity();
+
+      return BorrowedBookParser.recentActivity(recent);
+    } catch (error) {
+      this._logger.error(error.message, error);
+      throw error;
+    }
+  }
+
+  async recentActivitiesByStudent(
+    userId: string,
+  ): Promise<IRecentActivityResponse[]> {
+    try {
+      const recent =
+        await this._borrowedBookRepository.getRecentActivityByStudent(userId);
+
+      return BorrowedBookParser.recentActivity(recent);
+    } catch (error) {
+      this._logger.error(error.message, error);
+      throw error;
+    }
+  }
+
+  async incomingDue(): Promise<IIncomingDueResponse[]> {
+    try {
+      const recent = await this._borrowedBookRepository.getIncomingDue();
+
+      return BorrowedBookParser.incomingDue(recent);
+    } catch (error) {
+      this._logger.error(error.message, error);
+      throw error;
+    }
+  }
+
+  async incomingDueByStudent(userId: string): Promise<IIncomingDueResponse[]> {
+    try {
+      const recent =
+        await this._borrowedBookRepository.getIncomingDueByStudent(userId);
+
+      return BorrowedBookParser.incomingDue(recent);
     } catch (error) {
       this._logger.error(error.message, error);
       throw error;

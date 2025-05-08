@@ -1,3 +1,7 @@
+import {
+  IBorrowedBookDashboardResponse,
+  ITrendingBook,
+} from '../repositories/borrowedBook.repositories.interface';
 import { IFindBookData } from './Book.service.interface';
 
 export interface IBorrowedBookService {
@@ -13,6 +17,15 @@ export interface IBorrowedBookService {
   getBorrowBookByStudentId(
     input: IBorrowedBookListInput,
   ): Promise<IBorrowedBookListResponse>;
+  dashboardCard(
+    userId: string,
+    role: string,
+  ): Promise<IBorrowedBookDashboardResponse>;
+  trendingBook(): Promise<ITrendingBook[]>;
+  recentActivities(): Promise<IRecentActivityResponse[]>;
+  recentActivitiesByStudent(userId: string): Promise<IRecentActivityResponse[]>;
+  incomingDue(): Promise<IIncomingDueResponse[]>;
+  incomingDueByStudent(userId: string): Promise<IIncomingDueResponse[]>;
 }
 
 export interface IBorrowBook {
@@ -20,6 +33,10 @@ export interface IBorrowBook {
   dueDate: string;
   status: string;
   remainingBookCanBorrow: number;
+}
+
+export interface IDashboardCardInput {
+  userId: string;
 }
 
 export interface IBorrowBookInput {
@@ -68,6 +85,23 @@ export interface IBorrowedBookData {
   status: string;
   user: IBorrowedUser;
   book: IBorrowBookData | null;
+}
+
+export interface IRecentActivityResponse {
+  id: string;
+  borrowDate: string;
+  title: string;
+  author: string;
+  borrowerName: string;
+}
+
+export interface IIncomingDueResponse {
+  id: string;
+  dueDate: string;
+  title: string;
+  author: string;
+  borrowerName: string;
+  remainingDay: number;
 }
 
 interface IBorrowedUser {

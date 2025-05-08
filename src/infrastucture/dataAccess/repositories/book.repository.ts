@@ -75,4 +75,17 @@ export class BookRepository
       throw new InternalServerErrorException(error);
     }
   }
+
+  async totalAvailableBook(): Promise<number> {
+    try {
+      const result = await this.repository
+        .createQueryBuilder('book')
+        .select('SUM(book.quantity)', 'total')
+        .getRawOne();
+
+      return parseInt(result.total, 10) || 0;
+    } catch (error) {
+      throw new InternalServerErrorException(error);
+    }
+  }
 }
