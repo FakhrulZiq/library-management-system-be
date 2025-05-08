@@ -25,6 +25,28 @@ export class RegisterInput {
   matricOrStaffNo: string;
 }
 
+export class UpdateUserInput {
+  @ApiProperty()
+  name: string;
+
+  @ApiProperty()
+  role: string;
+
+  @ApiProperty()
+  matricOrStaffNo: string;
+
+  @ApiProperty()
+  status: string;
+}
+
+export class ChangeUserPasswordInput {
+  @ApiProperty()
+  oldPassword: string;
+
+  @ApiProperty()
+  newPassword: string;
+}
+
 export class ListUserInput {
   @ApiProperty()
   search?: string;

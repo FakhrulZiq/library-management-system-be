@@ -5,6 +5,7 @@ import {
   Injectable,
   InternalServerErrorException,
   NotFoundException,
+  UnauthorizedException,
 } from '@nestjs/common';
 import * as bcrypt from 'bcrypt';
 import { Audit } from 'src/domain/audit/audit';
@@ -19,11 +20,13 @@ import { IContextAwareLogger } from 'src/infrastucture/logger';
 import { IAudit } from 'src/interface/audit.interface';
 import { IUserRepository } from 'src/interface/repositories/user.repositories.interface';
 import {
+  IChangeUserPasswordInput,
   IDeleteResponse,
   IFindUserResponse,
   IListUserInput,
   IRegisterResponse,
   IResgisterInput,
+  IUpdateUserInput,
   IUserByID,
   IUserService,
 } from 'src/interface/service/user.service.interface';
@@ -70,6 +73,89 @@ export class UserService implements IUserService {
       await this._cacheResponse(paginatedBook, cacheKey);
 
       return paginatedBook;
+    } catch (error) {
+      this._logger.error(error.message, error);
+      throw error;
+    }
+  }
+
+  async resetPassword(
+    id: string,
+    input: IChangeUserPasswordInput,
+    email: string,
+  ): Promise<IUserByID> {
+    try {
+      const { newPassword, oldPassword } = input;
+
+      const user = await this._userRepository.findOne({ where: { id } });
+
+      if (!user) {
+        throw new NotFoundException(`There is no user with ID ${id}`);
+      }
+      const passwordValid = await bcrypt.compare(oldPassword, user.password);
+
+      if (!passwordValid) {
+        throw new UnauthorizedException('Old Password is incorrect!');
+      }
+
+      const hashedPassword: string = await bcrypt.hash(newPassword, 10);
+
+      const auditProps: IAudit = Audit.createAuditProperties(
+        email,
+        CRUD_ACTION.update,
+      );
+      const audit: Audit = Audit.create(auditProps).getValue();
+
+      const passwordUpdate = User.update(
+        { password: hashedPassword },
+        user,
+        audit,
+      );
+
+      const savedPassword = await this._userRepository.save(passwordUpdate);
+
+      if (!savedPassword) {
+        throw new Error('Update user password failed.');
+      }
+
+      return UserParser.userById(savedPassword);
+    } catch (error) {
+      this._logger.error(error.message, error);
+      throw error;
+    }
+  }
+
+  async updateUser(
+    id: string,
+    input: IUpdateUserInput,
+    email: string,
+  ): Promise<IUserByID> {
+    try {
+      const { name, role, matricOrStaffNo, status } = input;
+
+      const user = await this._userRepository.findOne({ where: { id } });
+
+      if (!user) {
+        throw new NotFoundException(`There is no user with ID ${id}`);
+      }
+
+      const auditProps: IAudit = Audit.createAuditProperties(
+        email,
+        CRUD_ACTION.update,
+      );
+      const audit: Audit = Audit.create(auditProps).getValue();
+
+      const userUpdate = User.update(input, user, audit);
+
+      const updatedUser: User = await this._userRepository.save(userUpdate);
+
+      if (!updatedUser) {
+        throw new InternalServerErrorException(`Failed to update user`);
+      }
+
+      await this._deleteUserPageCache();
+
+      return UserParser.userById(updatedUser);
     } catch (error) {
       this._logger.error(error.message, error);
       throw error;
