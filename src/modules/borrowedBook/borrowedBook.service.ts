@@ -152,15 +152,16 @@ export class BorrowedBookService implements IBorrowedBookService {
   async returnBook(
     input: IReturnBookInput,
     email: string,
-  ): Promise<IReturnBookOutput> {
+  ): Promise<IBorrowedBookData> {
     try {
       const borrowedBook = await this._borrowedBookRepository.findOne({
         where: { id: input.borrowedBookId },
+        relations: ['user', 'book'],
       });
 
       if (
-        borrowedBook.status === BOOK_STATUS.RETURNED &&
-        borrowedBook.return_date
+        borrowedBook.status === BOOK_STATUS.RETURNED ||
+        (borrowedBook.status === BOOK_STATUS.LOSTED && borrowedBook.return_date)
       ) {
         throw new BadRequestException('You already return this book');
       }
@@ -180,7 +181,11 @@ export class BorrowedBookService implements IBorrowedBookService {
       const audit: Audit = Audit.create(auditProps).getValue();
 
       const updateStatus = BorrowedBook.update(
-        { status: BOOK_STATUS.RETURNED, return_date: new Date().toISOString() },
+        {
+          status: input.status,
+          fine: input.fine,
+          return_date: new Date().toISOString(),
+        },
         borrowedBook,
         audit,
       );
@@ -200,12 +205,7 @@ export class BorrowedBookService implements IBorrowedBookService {
       await this._deleteBorrowCache();
       await this._bookServie.deleteBookPageCache();
 
-      return {
-        message: 'Book returned successfully.',
-        bookId: borrowedBook.id,
-        studentId: borrowedBook.user_id,
-        returnDate: extractDateFromISOString(new Date().toISOString()),
-      };
+      return BorrowedBookParser.bookById(updatedStatus);
     } catch (error) {
       this._logger.error(error.message, error);
       throw error;
@@ -216,12 +216,12 @@ export class BorrowedBookService implements IBorrowedBookService {
     input: IBorrowedBookListInput,
   ): Promise<IBorrowedBookListResponse> {
     try {
-      const { pageNum, pageSize, statuses, search } = input;
+      const { pageNum, pageSize, statuses, search, studentId } = input;
 
       const defaultPageSize = PAGINATION.defaultRecords;
       input.pageSize = pageSize ?? defaultPageSize;
 
-      const cacheKey = `list_borrow_book_page${pageNum}_limit${pageSize}_searchBy${search}_filterBy${statuses}`;
+      const cacheKey = `borrowed_book_page${pageNum}_limit${pageSize}_searchBy${search}_filterBy${statuses}_studentId${studentId}`;
 
       const cachedData = await this._getCachedData(cacheKey);
 
@@ -297,7 +297,8 @@ export class BorrowedBookService implements IBorrowedBookService {
         throw new NotFoundException(`Borrowed book with ID ${id} not found`);
       }
 
-      return BorrowedBookParser.bookById(borrowedBook);
+      const bookParse = BorrowedBookParser.bookById(borrowedBook);
+      return bookParse;
     } catch (error) {
       this._logger.error(error.message, error);
       throw error;

@@ -12,6 +12,7 @@ export class BorrowedBook extends Entity implements IBorrowedBook {
   user_id: string;
   book_id: string;
   return_date?: string;
+  fine?: number;
   due_date: string;
   status: string;
   user?: User;
@@ -24,6 +25,7 @@ export class BorrowedBook extends Entity implements IBorrowedBook {
     this.user_id = props.user_id;
     this.book_id = props.book_id;
     this.return_date = props.return_date;
+    this.fine = props.fine;
     this.due_date = props.due_date;
     this.status = props.status;
     this.user = props.user;

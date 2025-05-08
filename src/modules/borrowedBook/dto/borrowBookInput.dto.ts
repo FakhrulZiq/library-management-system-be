@@ -11,6 +11,12 @@ export class BorrowBookInput {
 export class ReturnBookInput {
   @ApiProperty()
   borrowedBookId: string;
+
+  @ApiProperty()
+  status: string;
+
+  @ApiProperty()
+  fine: number | null;
 }
 
 export class BorrowedBookListInput {

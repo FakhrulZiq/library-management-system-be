@@ -113,7 +113,7 @@ export class BorrowedBookRepository
       }
 
       if (statuses && statuses.length > 0) {
-        queryBuilder.andWhere('LOWER(borrow.status) IN (:...statuses)', {
+        queryBuilder.andWhere('borrow.status IN (:...statuses)', {
           statuses: statuses.map((s) => s.toLowerCase()),
         });
       }

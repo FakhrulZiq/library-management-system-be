@@ -17,6 +17,9 @@ export class BorrowedBookModel extends BaseModel {
   @Column({ nullable: true })
   return_date?: string;
 
+  @Column({ nullable: true })
+  fine?: number;
+
   @Column()
   due_date: string;
 
