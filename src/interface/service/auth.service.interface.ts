@@ -3,6 +3,7 @@ export interface IAuthService {
   assignNewAcessToken(input: INewAccessTokenInput): Promise<INewAccessToken>;
   logout(input: INewAccessTokenInput): Promise<ILogOutResponse>;
   verifyToken(accessToken: string): Promise<boolean>;
+  resetPassword(input: IResetPasswordInput): Promise<IResetPasswordResponse>;
 }
 
 export interface IValidateUserInput {
@@ -10,13 +11,15 @@ export interface IValidateUserInput {
   password: string;
 }
 
+export interface IResetPasswordInput extends IValidateUserInput {}
+
 export interface IValidateUserResponse {
   accessToken: string;
   refreshToken: string;
   email: string;
   role: string;
   name: string;
-  id: string
+  id: string;
 }
 
 export interface INewAccessTokenInput {
@@ -37,3 +40,5 @@ export interface IPayloadJwt {
 export interface ILogOutResponse {
   message: string;
 }
+
+export interface IResetPasswordResponse extends ILogOutResponse {}

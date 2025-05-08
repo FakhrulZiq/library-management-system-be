@@ -1,4 +1,4 @@
-import { ApiProperty } from "@nestjs/swagger";
+import { ApiProperty } from '@nestjs/swagger';
 
 export class LoginInput {
   @ApiProperty()
@@ -12,3 +12,5 @@ export class RefreshTokenInput {
   @ApiProperty()
   refreshToken: string;
 }
+
+export class ResetPasswordInput extends LoginInput {}

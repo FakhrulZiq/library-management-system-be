@@ -30,6 +30,8 @@ export class LogOutResponse {
   message: string;
 }
 
+export class ResetPasswordResponse extends LogOutResponse {}
+
 export class NewAccessTokenResponse {
   @ApiProperty()
   accessToken: string;

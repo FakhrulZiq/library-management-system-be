@@ -7,6 +7,16 @@ export interface IUserService {
   clearRefreshToken(id: string): Promise<void>;
   getUser(input: IListUserInput): Promise<IFindUserResponse>;
   deleteUser(id: string, email: string): Promise<IDeleteResponse>;
+  updateUser(
+    id: string,
+    input: IUpdateUserInput,
+    email: string,
+  ): Promise<IUserByID>;
+  resetPassword(
+    id: string,
+    input: IChangeUserPasswordInput,
+    email: string,
+  ): Promise<IUserByID>;
 }
 
 export interface IResgisterInput {
@@ -15,6 +25,17 @@ export interface IResgisterInput {
   role: string;
   name: string;
   matricOrStaffNo: string;
+}
+
+export interface IChangeUserPasswordInput {
+  oldPassword: string;
+  newPassword: string;
+}
+export interface IUpdateUserInput {
+  name: string;
+  role: string;
+  matricOrStaffNo: string;
+  status: string;
 }
 
 interface IMessageResponse {

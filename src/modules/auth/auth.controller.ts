@@ -3,19 +3,25 @@ import {
   Controller,
   Inject,
   Post,
+  Put,
   Req,
   UnauthorizedException,
   UseGuards,
 } from '@nestjs/common';
-import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
+import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
 import { TYPES } from 'src/infrastucture/constant';
 import { IAuthService } from 'src/interface/service/auth.service.interface';
 import { JwtAuthGuard } from './auth.guard';
-import { LoginInput, RefreshTokenInput } from './dto/auth-input.dto';
+import {
+  LoginInput,
+  RefreshTokenInput,
+  ResetPasswordInput,
+} from './dto/auth-input.dto';
 import {
   AuthResponse,
   LogOutResponse,
   NewAccessTokenResponse,
+  ResetPasswordResponse,
 } from './dto/auth-response.dto';
 
 @ApiTags('User')
@@ -30,6 +36,15 @@ export class AuthController {
   @Post('login')
   async login(@Body() loginInput: LoginInput): Promise<AuthResponse> {
     return this._authService.validateUser(loginInput);
+  }
+
+  @Put('reset-password')
+  @UseGuards(JwtAuthGuard)
+  @ApiOperation({ summary: 'Update password' })
+  async updatePassowrd(
+    @Body() input: ResetPasswordInput,
+  ): Promise<ResetPasswordResponse> {
+    return this._authService.resetPassword(input);
   }
 
   @Post('refresh-token')

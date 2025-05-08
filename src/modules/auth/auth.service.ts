@@ -12,16 +12,20 @@ import { User } from '../user/user';
 import { IUserService } from 'src/interface/service/user.service.interface';
 import { IUserRepository } from 'src/interface/repositories/user.repositories.interface';
 import { IContextAwareLogger } from 'src/infrastucture/logger';
-import { TYPES } from 'src/infrastucture/constant';
+import { CRUD_ACTION, TYPES } from 'src/infrastucture/constant';
 import {
   IAuthService,
   ILogOutResponse,
   INewAccessToken,
   INewAccessTokenInput,
   IPayloadJwt,
+  IResetPasswordInput,
+  IResetPasswordResponse,
   IValidateUserInput,
   IValidateUserResponse,
 } from 'src/interface/service/auth.service.interface';
+import { IAudit } from 'src/interface/audit.interface';
+import { Audit } from 'src/domain/audit/audit';
 
 @Injectable()
 export class AuthService implements IAuthService {
@@ -120,12 +124,55 @@ export class AuthService implements IAuthService {
         );
       }
 
-      const inputNewToken = { email: user.email, sub: user.id, role: user.role };
+      const inputNewToken = {
+        email: user.email,
+        sub: user.id,
+        role: user.role,
+      };
       const newAccessToken = this._jwtService.sign(inputNewToken, {
         expiresIn: '2m',
       });
 
       return { accessToken: newAccessToken };
+    } catch (error) {
+      this._logger.error(error.message, error);
+      throw error;
+    }
+  }
+
+  async resetPassword(
+    input: IResetPasswordInput,
+  ): Promise<IResetPasswordResponse> {
+    try {
+      const { email, password } = input;
+
+      const user = await this._userRepository.findOne({ where: { email } });
+
+      if (!user) {
+        throw new NotFoundException(`There is no user with email ${email}`);
+      }
+
+      const hashedPassword: string = await bcrypt.hash(password, 10);
+
+      const auditProps: IAudit = Audit.createAuditProperties(
+        email,
+        CRUD_ACTION.update,
+      );
+      const audit: Audit = Audit.create(auditProps).getValue();
+
+      const passwordUpdate = User.update(
+        { password: hashedPassword },
+        user,
+        audit,
+      );
+
+      const savedPassword = await this._userRepository.save(passwordUpdate);
+
+      if (!savedPassword) {
+        throw new Error('Update user password failed.');
+      }
+
+      return { message: 'Password reset sucessfully!' };
     } catch (error) {
       this._logger.error(error.message, error);
       throw error;
