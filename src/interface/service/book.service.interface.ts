@@ -4,7 +4,11 @@ export interface IBookService {
     email: string,
   ): Promise<IAddBookResponse>;
   findBook(input: IFindBookInput): Promise<IFindBookData[]>;
-  updateBook(id: string, input: IUpdateBook, email: string): Promise<IFindBookData>;
+  updateBook(
+    id: string,
+    input: IUpdateBook,
+    email: string,
+  ): Promise<IFindBookData>;
   listBook(input: IListBookInpput): Promise<IFindBookResponse>;
   deleteBook(id: string, email: string): Promise<IDeleteBookResponse>;
   deleteBookPageCache(): Promise<void>;
@@ -18,6 +22,7 @@ export interface IUpdateBook {
   published_year: string;
   quantity: number;
   price: number;
+  isbn?: string;
 }
 
 export interface IAddNewBookInput {
@@ -65,6 +70,7 @@ export interface IFindBookData {
   quantity: number;
   barcodeNo: string;
   price: number;
+  isbn: string;
 }
 
 export interface IListBookInpput {
