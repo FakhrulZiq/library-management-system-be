@@ -63,6 +63,9 @@ export class FindBookData {
 
   @ApiProperty()
   barcodeNo: string;
+
+  @ApiProperty()
+  isbn: string;
 }
 
 export class UpdateBookInput {
@@ -86,4 +89,7 @@ export class UpdateBookInput {
 
   @ApiProperty()
   email: string;
+
+  @ApiProperty()
+  isbn?: string;
 }

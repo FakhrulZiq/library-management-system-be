@@ -11,6 +11,7 @@ export class Book extends Entity implements IBook {
   published_year: string;
   quantity: number;
   price: number;
+  isbn?: string;
   audit: Audit;
 
   constructor(id: string, props: IBook) {
@@ -20,6 +21,7 @@ export class Book extends Entity implements IBook {
     this.barcodeNo = props.barcodeNo;
     this.published_year = props.published_year;
     this.quantity = props.quantity;
+    this.isbn = props.isbn
     this.price = props.price;
     this.audit = props.audit;
   }
