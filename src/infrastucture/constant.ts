@@ -20,6 +20,11 @@ export const TYPES = {
 
 export const ROLES_KEY = 'roles';
 
+export const USER_ROLE = {
+  STUDENT: 'student',
+  LIBRARIAN: 'librarian',
+};
+
 export const USER_STATUS = {
   ACTIVE: 'Active',
   INACTIVE: 'Inactive',

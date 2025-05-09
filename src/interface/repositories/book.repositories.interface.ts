@@ -11,6 +11,7 @@ export interface IBookRepository extends IGenericRepository<Book, BookModel> {
   listBookByPagination(
     input: IListBookInpput,
   ): Promise<IListBooByPaginationResponse>;
+  totalAvailableBook(): Promise<number>;
 }
 
 export interface IListBooByPaginationResponse {

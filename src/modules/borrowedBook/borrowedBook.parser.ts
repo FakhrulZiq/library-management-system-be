@@ -3,7 +3,12 @@ import {
   getDaysRemaining,
 } from 'src/utilities/utils';
 import { BorrowedBook } from './borrowedBook';
-import { IBorrowedBookData } from 'src/interface/service/borrowedBook.service.interface';
+import {
+  IBorrowedBookData,
+  IIncomingDueResponse,
+  IRecentActivityResponse,
+} from 'src/interface/service/borrowedBook.service.interface';
+import { title } from 'process';
 
 export class BorrowedBookParser {
   static listBook(borrowedBooks: BorrowedBook[]): IBorrowedBookData[] {
@@ -65,5 +70,38 @@ export class BorrowedBookParser {
           }
         : null,
     };
+  }
+
+  static recentActivity(
+    borrowedBooks: BorrowedBook[],
+  ): IRecentActivityResponse[] {
+    const data = borrowedBooks.map((borrowedBook: BorrowedBook) => {
+      return {
+        id: borrowedBook.id,
+        borrowDate: extractDateFromISOString(borrowedBook?.borrow_date),
+        title: borrowedBook.book?.title,
+        author: borrowedBook.book?.author,
+        borrowerName: borrowedBook.user?.name,
+      };
+    });
+    return data;
+  }
+
+  static incomingDue(borrowedBooks: BorrowedBook[]): IIncomingDueResponse[] {
+    const data = borrowedBooks.map((borrowedBook: BorrowedBook) => {
+      return {
+        id: borrowedBook.id,
+        dueDate: extractDateFromISOString(borrowedBook?.due_date),
+        title: borrowedBook.book?.title,
+        author: borrowedBook.book?.author,
+        borrowerName: borrowedBook.user?.name,
+        remainingDay: getDaysRemaining(
+          borrowedBook.borrow_date,
+          borrowedBook.return_date,
+          borrowedBook.due_date,
+        ),
+      };
+    });
+    return data;
   }
 }

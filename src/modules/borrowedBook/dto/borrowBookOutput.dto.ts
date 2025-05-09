@@ -99,3 +99,68 @@ class BorrowBookData {
   @ApiProperty()
   price: number;
 }
+
+export class BorrowedBookDashboardResponse {
+  @ApiProperty()
+  borrowedCount: number;
+
+  @ApiProperty()
+  lostedCount: number;
+
+  @ApiProperty()
+  totalFine: number;
+
+  @ApiProperty()
+  totalAvailableBook: number;
+}
+
+export class TrendingBook {
+  @ApiProperty()
+  id: string;
+
+  @ApiProperty()
+  title: string;
+
+  @ApiProperty()
+  author: string;
+
+  @ApiProperty()
+  borrowCount: number;
+}
+
+export class RecentActivityResponse {
+  @ApiProperty()
+  id: string;
+
+  @ApiProperty()
+  borrowDate: string;
+
+  @ApiProperty()
+  title: string;
+
+  @ApiProperty()
+  author: string;
+
+  @ApiProperty()
+  borrowerName: string;
+}
+
+export class IncomingDueResponse {
+  @ApiProperty()
+  id: string;
+
+  @ApiProperty()
+  dueDate: string;
+
+  @ApiProperty()
+  title: string;
+
+  @ApiProperty()
+  author: string;
+
+  @ApiProperty()
+  borrowerName: string;
+
+  @ApiProperty()
+  remainingDay: number;
+}

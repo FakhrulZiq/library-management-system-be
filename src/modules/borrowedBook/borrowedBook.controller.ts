@@ -15,14 +15,21 @@ import { JwtAuthGuard } from '../auth/auth.guard';
 import {
   BorrowBookInput,
   BorrowedBookListInput,
-  ReturnBookInput
+  DashboardCardInput,
+  ReturnBookInput,
 } from './dto/borrowBookInput.dto';
 import {
   BorrowBookOutput,
+  BorrowedBookDashboardResponse,
   BorrowedBookData,
   BorrowedListResponse,
+  IncomingDueResponse,
+  RecentActivityResponse,
   ReturnBookOutput,
+  TrendingBook,
 } from './dto/borrowBookOutput.dto';
+import { RolesGuard } from '../auth/roles.guard';
+import { Roles } from '../auth/roles.decorator';
 
 @ApiTags()
 @ApiBearerAuth()
@@ -69,6 +76,54 @@ export class BorrowedBookController {
     @Body() input: BorrowedBookListInput,
   ): Promise<BorrowedListResponse> {
     return this._borrowedBookService.getAllBorrowedBook(input);
+  }
+
+  @Get('dashboard')
+  @UseGuards(JwtAuthGuard)
+  @ApiOperation({ summary: 'Dashboard data' })
+  async dashboardData(@Req() req): Promise<BorrowedBookDashboardResponse> {
+    const role = req.user.role;
+    const userId = req.user.userId;
+    return this._borrowedBookService.dashboardCard(userId, role);
+  }
+
+  @Get('trending-book')
+  @UseGuards(JwtAuthGuard)
+  @ApiOperation({ summary: 'trending book data' })
+  async trendingBook(): Promise<TrendingBook[]> {
+    return this._borrowedBookService.trendingBook();
+  }
+
+  @Get('recent-activity')
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles('admin', 'librarian')
+  @ApiOperation({ summary: 'recent activity data' })
+  async recentActivity(): Promise<RecentActivityResponse[]> {
+    return this._borrowedBookService.recentActivities();
+  }
+
+  @Get('recent-activity-student')
+  @UseGuards(JwtAuthGuard)
+  @ApiOperation({ summary: 'recent activity data' })
+  async recentActivityByStudent(@Req() req): Promise<RecentActivityResponse[]> {
+    const userId = req.user.userId;
+    return this._borrowedBookService.recentActivitiesByStudent(userId);
+  }
+
+  @Get('incoming-due')
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles('admin', 'librarian')
+  @ApiOperation({ summary: 'incoming due data' })
+  async incomingDue(): Promise<IncomingDueResponse[]> {
+    return this._borrowedBookService.incomingDue();
+  }
+
+  @Get('incoming-due-student')
+  @UseGuards(JwtAuthGuard)
+  @ApiOperation({ summary: 'incoming due data' })
+  async incomingDueByStudent(@Req() req): Promise<IncomingDueResponse[]> {
+    const userId = req.user.userId;
+    return this._borrowedBookService.incomingDueByStudent(userId);
   }
 
   @Post('student')
