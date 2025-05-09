@@ -2,6 +2,11 @@
 
 This is a self-learning project built to deepen my understanding of backend development using modern technologies such as **Node.js**, **NestJS**, **GraphQL**, and **PostgreSQL**. It covers real-world practices like API design, database interaction, caching, modular architecture, and more.
 
+> 🔗 **Frontend Code Available**:  
+> This project comes with a modern and responsive frontend built using Next.js & Tailwind CSS.  
+> 👉 [View Frontend Repository](https://github.com/FakhrulZiq/library-management-system-fe)
+
+
 ## 🧰 Tech Stack
 
 - Node.js – JavaScript runtime  
