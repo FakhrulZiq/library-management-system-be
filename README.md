@@ -81,6 +81,15 @@ npm run start:prod
 npm run test
 ```
 
+
+### View API Documentation
+
+> 📘 **Swagger UI Available**
+> 
+> Once the server is running, you can view the auto-generated REST API documentation at:
+> 
+> 👉 http://localhost:3000/api
+
 ## 📁 Project Structure
 
 ```
@@ -105,9 +114,5 @@ This project is part of my personal journey to improve backend development skill
 
 Feel free to fork, clone, or suggest improvements!
 
-## 📬 Contact
-
-Created with ❤️ by [Your Name]  
-[LinkedIn](https://www.linkedin.com/in/fakhrul-haziq/) • [GitHub](https://github.com/FakhrulZiq)
 
 
