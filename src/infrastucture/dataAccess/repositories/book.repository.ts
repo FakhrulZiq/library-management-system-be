@@ -4,15 +4,15 @@ import {
   IBookRepository,
   IListBooByPaginationResponse,
 } from 'src/interface/repositories/book.repositories.interface';
-import { Book } from 'src/modules/Book/Book';
-import { BookMapper } from 'src/modules/Book/Book.mapper';
+import { Book } from 'src/modules/book/book';
+import { BookMapper } from 'src/modules/book/book.mapper';
 import { ILike, Repository } from 'typeorm';
-import { BookModel } from '../models/Book.entity';
+import { BookModel } from '../models/book.entity';
 import { GenericSqlRepository } from './generic.repository';
 import {
   IFindBookInput,
   IListBookInpput,
-} from 'src/interface/service/Book.service.interface';
+} from 'src/interface/service/book.service.interface';
 
 @Injectable()
 export class BookRepository

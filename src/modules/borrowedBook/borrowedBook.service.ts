@@ -27,7 +27,7 @@ import {
   IBorrowedBookRepository,
   ITrendingBook,
 } from 'src/interface/repositories/borrowedBook.repositories.interface';
-import { IBookService } from 'src/interface/service/Book.service.interface';
+import { IBookService } from 'src/interface/service/book.service.interface';
 import {
   IBorrowBook,
   IBorrowBookInput,
