@@ -12,7 +12,7 @@ import {
 } from '@nestjs/common';
 import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
 import { TYPES } from 'src/infrastucture/constant';
-import { IBookService } from 'src/interface/service/Book.service.interface';
+import { IBookService } from 'src/interface/service/book.service.interface';
 import { JwtAuthGuard } from '../auth/auth.guard';
 import { Roles } from '../auth/roles.decorator';
 import { RolesGuard } from '../auth/roles.guard';

@@ -8,7 +8,7 @@ import { IRedisService } from 'src/infrastucture/redis/redisInterface';
 import {
   IFindBookResponse,
   IListBookInpput,
-} from 'src/interface/service/Book.service.interface';
+} from 'src/interface/service/book.service.interface';
 import { IBorrowedBookListResponse } from 'src/interface/service/borrowedBook.service.interface';
 import { IFindUserResponse } from 'src/interface/service/user.service.interface';
 

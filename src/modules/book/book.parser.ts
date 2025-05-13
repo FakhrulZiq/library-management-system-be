@@ -1,5 +1,5 @@
-import { IFindBookData } from 'src/interface/service/Book.service.interface';
-import { Book } from './Book';
+import { IFindBookData } from 'src/interface/service/book.service.interface';
+import { Book } from './book';
 
 export class BookParser {
   static findBook(books: Book[]): IFindBookData[] {

@@ -1,7 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { AuditMapper } from 'src/domain/audit/audit.mapper';
-import { Book } from './Book';
-import { BookModel } from 'src/infrastucture/dataAccess/models/Book.entity';
+import { Book } from './book';
+import { BookModel } from 'src/infrastucture/dataAccess/models/book.entity';
 import { IMapper } from 'src/interface/mapper.interface';
 
 @Injectable()

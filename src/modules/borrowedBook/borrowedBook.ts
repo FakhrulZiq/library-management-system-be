@@ -5,7 +5,7 @@ import { IBook } from 'src/interface/book.interface';
 import { IBorrowedBook } from 'src/interface/borrowedBook.interface';
 import { updateEntity } from 'src/utilities/utils';
 import { User } from '../user/user';
-import { Book } from '../Book/Book';
+import { Book } from '../book/book';
 
 export class BorrowedBook extends Entity implements IBorrowedBook {
   borrow_date: string;

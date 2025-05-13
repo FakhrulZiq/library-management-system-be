@@ -1,11 +1,11 @@
 import { Injectable } from '@nestjs/common';
 import { AuditMapper } from 'src/domain/audit/audit.mapper';
-import { BookModel } from 'src/infrastucture/dataAccess/models/Book.entity';
+import { BookModel } from 'src/infrastucture/dataAccess/models/book.entity';
 import { BorrowedBookModel } from 'src/infrastucture/dataAccess/models/borrowedBook.entity';
 import { UserModel } from 'src/infrastucture/dataAccess/models/user.entity';
 import { IMapper } from 'src/interface/mapper.interface';
-import { Book } from '../Book/Book';
-import { BookMapper } from '../Book/Book.mapper';
+import { Book } from '../book/book';
+import { BookMapper } from '../book/book.mapper';
 import { User } from '../user/user';
 import { UserMapper } from '../user/user.mapper';
 import { BorrowedBook } from './borrowedBook';

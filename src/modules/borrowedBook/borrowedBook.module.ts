@@ -10,7 +10,7 @@ import { BorrowedBookController } from './borrowedBook.controller';
 import { BorrowedBookMapper } from './borrowedBook.mapper';
 import { BorrowedBookService } from './borrowedBook.service';
 import { UserMapper } from '../user/user.mapper';
-import { BookMapper } from '../Book/Book.mapper';
+import { BookMapper } from '../book/book.mapper';
 import { RedisCacheService } from 'src/infrastucture/redis/redisService';
 import { BookService } from '../book/book.service';
 import { RedisClientProvider } from 'src/infrastucture/redis/redis.provider';

@@ -2,7 +2,7 @@ import {
   IBorrowedBookDashboardResponse,
   ITrendingBook,
 } from '../repositories/borrowedBook.repositories.interface';
-import { IFindBookData } from './Book.service.interface';
+import { IFindBookData } from './book.service.interface';
 
 export interface IBorrowedBookService {
   borrowBook(input: IBorrowBookInput, email: string): Promise<IBorrowBook>;

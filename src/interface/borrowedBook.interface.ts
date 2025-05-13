@@ -1,5 +1,5 @@
 import { Audit } from 'src/domain/audit/audit';
-import { Book } from 'src/modules/Book/Book';
+import { Book } from 'src/modules/book/book';
 import { User } from 'src/modules/user/user';
 
 export interface IBorrowedBook {
