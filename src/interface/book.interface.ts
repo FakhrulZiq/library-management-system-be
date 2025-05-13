@@ -7,5 +7,6 @@ export interface IBook {
   published_year: string;
   quantity: number;
   price: number;
+  isbn?: string
   audit: Audit;
 }

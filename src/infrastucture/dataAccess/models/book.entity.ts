@@ -17,6 +17,9 @@ export class BookModel extends BaseModel {
   published_year: string;
 
   @Column()
+  isbn?: string;
+
+  @Column()
   quantity: number;
 
   @Column()

@@ -60,6 +60,9 @@ export class BookRepository
           'LOWER(book.title) LIKE :search OR LOWER(book.author) LIKE :search',
           { search: `%${search.toLowerCase()}%` },
         );
+        queryBuilder.andWhere('book.quantity > 0');
+      } else {
+        queryBuilder.where('book.quantity > 0');
       }
 
       const [books, total] = await queryBuilder

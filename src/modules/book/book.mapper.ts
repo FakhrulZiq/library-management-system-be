@@ -7,7 +7,7 @@ import { IMapper } from 'src/interface/mapper.interface';
 @Injectable()
 export class BookMapper implements IMapper<Book, BookModel> {
   toPersistence(entity: Book): BookModel {
-    const { title, author, barcodeNo, published_year, price, quantity, audit } =
+    const { title, author, barcodeNo, published_year, price, isbn, quantity, audit } =
       entity;
 
     const {
@@ -27,6 +27,7 @@ export class BookMapper implements IMapper<Book, BookModel> {
       published_year,
       quantity,
       price,
+      isbn,
       auditCreatedBy,
       auditCreatedDateTime,
       auditDeletedBy,
@@ -38,7 +39,7 @@ export class BookMapper implements IMapper<Book, BookModel> {
   }
 
   toDomain(model: BookModel): Book {
-    const { id, title, author, barcodeNo, published_year, price, quantity } = model;
+    const { id, title, author, barcodeNo, published_year, isbn, price, quantity } = model;
 
     return Book.create(
       {
@@ -47,6 +48,7 @@ export class BookMapper implements IMapper<Book, BookModel> {
         barcodeNo,
         published_year,
         quantity,
+        isbn,
         price,
         audit: new AuditMapper().toDomain(model),
       },
